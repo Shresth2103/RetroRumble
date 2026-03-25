@@ -1,73 +1,105 @@
-# React + TypeScript + Vite
+🎮 ACM SIGBED — RETRO RUMBLE.EXE
+A retro pixel-art arcade dashboard for the ACM SIGBED Retro Rumble event. Players complete 4 mini-games and collect electronic components as rewards.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+📁 Project Structure
 
-Currently, two official plugins are available:
+retro-rumble/
+├── public/
+├── src/
+│   ├── App.jsx          ← Main dashboard component
+│   ├── App.css          ← Global styles
+│   └── main.jsx         ← React entry point
+├── index.html
+├── package.json
+└── vite.config.js
+🚀 Getting Started
+1. Install dependencies
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+bash
+npm install
+2. Start the dev server
 
-## React Compiler
+bash
+npm run dev
+3. Build for production
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+bash
+npm run build
+🎮 The 4 Games
+Card	Game	Reward Component
+Top Left	Pac-Man	Breadboard
+Top Right	Tetris	Resistors
+Bottom Left	Flappy Bird	Jumper Wires
+Bottom Right	Solar Smash	LED Kit
+🔧 How to Hook Up a Game (for team members)
+Each game card has an onClick handler. Find the handleGameClick function in App.jsx and add your route:
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+jsx
+const handleGameClick = (game) => {
+  // Replace with your game routing
+  const gameRoutes = {
+    pacman:  '/games/pacman',
+    tetris:  '/games/tetris',
+    flappy:  '/games/flappy',
+    solar:   '/games/solar',
+  };
+  navigate(gameRoutes[game]); // if using React Router
+  // or
+  window.location.href = gameRoutes[game];
+};
+If you're using React Router, install it first:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+bash
+npm install react-router-dom
+✏️ Customisation
+What	Where
+Event name / date / venue	Bottom section in App.jsx
+Progress bar percentage	progressValue state in App.jsx
+Reward component names	rewardLabel prop on each GameCard
+Color palette	CSS variables in App.css under :root
+Game card click behaviour	handleGameClick() in App.jsx
+🎨 Tech Stack
+Vite + React — fast dev server and build tool
+Canvas API — all 4 game preview scenes drawn via useEffect + useRef
+Google Fonts — Press Start 2P (pixel font)
+CSS animations — starfield, progress bar pulse, floating components, card hover glow
+No UI library — fully custom styled
+📦 Dependencies
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
+json
+{
+  "dependencies": {
+    "react": "^18.x",
+    "react-dom": "^18.x"
   },
-])
-```
+  "devDependencies": {
+    "vite": "^5.x",
+    "@vitejs/plugin-react": "^4.x"
+  }
+}
+Font is loaded via CDN in index.html:
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+html
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+Requires internet connection to load the font. For fully offline use, install it locally:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+
+bash
+npm install @fontsource/press-start-2p
+Then import in main.jsx:
+
+
+js
+import '@fontsource/press-start-2p';
+👥 Team
+Built for ACM SIGBED — Retro Rumble
+
+Role	Name
+Dashboard	[your name]
+Pac-Man	[team member]
+Tetris	[team member]
+Flappy Bird	[team member]
+Solar Smash	[team member]
