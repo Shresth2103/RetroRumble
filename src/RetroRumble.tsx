@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import SolarSmashGame from "./games/SolarSmashGame";
+import AsteroidDestroyerGame from "./games/AsteroidDestroyerGame";
+import TetrisGame from "./games/TetrisGame";
 
 // ─── Pixel Art Previews ───────────────────────────────────────────────────────
 
@@ -139,6 +142,42 @@ function SolarPreview() {
   );
 }
 
+function AsteroidPreview() {
+  const [shipX, setShipX] = useState(34);
+
+  useEffect(() => {
+    let direction = 1;
+    const id = setInterval(() => {
+      setShipX((value) => {
+        if (value >= 54) {
+          direction = -1;
+        } else if (value <= 30) {
+          direction = 1;
+        }
+
+        return value + direction * 1.5;
+      });
+    }, 40);
+
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <svg viewBox="0 0 180 100" width="100%" style={{ display: "block" }}>
+      <rect width="180" height="100" fill="#050914" />
+      {([[18,14],[38,10],[68,18],[104,12],[142,16],[162,26],[28,72],[82,86],[144,74]] as number[][]).map(([x,y],i)=>(
+        <circle key={i} cx={x} cy={y} r={i % 3 === 0 ? 1.6 : 1} fill="#fff" opacity={0.7}/>
+      ))}
+      <circle cx="118" cy="42" r="18" fill="#8b8fa7" />
+      <circle cx="142" cy="64" r="10" fill="#6d7388" />
+      <circle cx="96" cy="68" r="8" fill="#9ca3bd" />
+      <path d={`M${shipX} 52 L${shipX + 10} 46 L${shipX + 6} 52 L${shipX + 10} 58 Z`} fill="#4f7df3" />
+      <rect x={shipX + 8} y="51" width="42" height="2" fill="#9ac0ff" opacity="0.8" />
+      <text x="10" y="18" fill="#8fb1ff" fontSize="8" fontFamily="monospace">SCORE: 2000</text>
+    </svg>
+  );
+}
+
 // ─── Game Data (no JSX here) ──────────────────────────────────────────────────
 
 interface Game {
@@ -153,6 +192,7 @@ interface Game {
   reward: string;
   rewardIcon: string;
   description: string;
+  implemented?: boolean;
 }
 
 const GAMES: Game[] = [
@@ -168,6 +208,7 @@ const GAMES: Game[] = [
     reward: "Jumper Wires & Resistors",
     rewardIcon: "〰️",
     description: "Navigate the drone through obstacles. Score 15 to unlock the next challenge.",
+    implemented: false,
   },
   {
     id: "pacman",
@@ -181,6 +222,7 @@ const GAMES: Game[] = [
     reward: "Breadboard",
     rewardIcon: "🔲",
     description: "Eat all the dots and avoid the ghosts. Score 20 to claim your reward.",
+    implemented: false,
   },
   {
     id: "tetris",
@@ -189,24 +231,26 @@ const GAMES: Game[] = [
     color: "#00FF41",
     glowColor: "#00FF41",
     borderColor: "#00FF41",
-    locked: true,
-    goal: 500,
-    reward: "RGB LED",
+    locked: false,
+    goal: 300,
+    reward: "RGB Lights",
     rewardIcon: "💡",
-    description: "Stack the blocks and clear lines. Score 500 to light up your build.",
+    description: "Stack the blocks and clear lines. Score 300 to light up your build.",
+    implemented: true,
   },
   {
-    id: "solar",
-    title: "SOLAR SMASH",
+    id: "asteroid",
+    title: "ASTEROID DESTROYER",
     subtitle: "MISSION 04",
-    color: "#FF4444",
-    glowColor: "#FF4444",
-    borderColor: "#FF4444",
-    locked: true,
-    goal: 3,
+    color: "#4F7DF3",
+    glowColor: "#4F7DF3",
+    borderColor: "#4F7DF3",
+    locked: false,
+    goal: 2000,
     reward: "Buzzer",
     rewardIcon: "🔔",
-    description: "Destroy planets with cosmic weapons. Smash 3 to claim your buzzer.",
+    description: "Pilot your ship through an asteroid storm. Reach 2000 points to claim your buzzer.",
+    implemented: true,
   },
 ];
 
@@ -217,6 +261,13 @@ const PREVIEWS: Record<string, React.ReactElement> = {
   pacman: <PacmanPreview />,
   tetris: <TetrisPreview />,
   solar:  <SolarPreview />,
+  asteroid: <AsteroidPreview />,
+};
+
+const GAME_COMPONENTS: Partial<Record<string, ({ onExit }: { onExit: () => void }) => React.ReactElement>> = {
+  solar: SolarSmashGame,
+  tetris: TetrisGame,
+  asteroid: AsteroidDestroyerGame,
 };
 
 // ─── Lock Overlay ─────────────────────────────────────────────────────────────
@@ -320,7 +371,15 @@ function GameCard({ game, onSelect, isActive }: { game: Game; onSelect: (g: Game
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
 
-function GameModal({ game, onClose }: { game: Game | null; onClose: () => void }) {
+function GameModal({
+  game,
+  onClose,
+  onPlay,
+}: {
+  game: Game | null;
+  onClose: () => void;
+  onPlay: (game: Game) => void;
+}) {
   if (!game) return null;
   return (
     <div
@@ -384,16 +443,16 @@ function GameModal({ game, onClose }: { game: Game | null; onClose: () => void }
           <button
             style={{
               flex: 1, padding: "12px 0",
-              background: game.color,
-              color: "#000",
-              border: "none", borderRadius: 4,
+              background: game.implemented ? game.color : "transparent",
+              color: game.implemented ? "#000" : "#667788",
+              border: game.implemented ? "none" : "1px solid #334455", borderRadius: 4,
               fontFamily: "'Press Start 2P', monospace",
               fontSize: 9, letterSpacing: 1,
-              cursor: "pointer",
+              cursor: game.implemented ? "pointer" : "not-allowed",
             }}
-            onClick={onClose}
+            onClick={() => game.implemented && onPlay(game)}
           >
-            PLAY GAME
+            {game.implemented ? "PLAY GAME" : "COMING SOON"}
           </button>
           <button
             style={{
@@ -410,6 +469,110 @@ function GameModal({ game, onClose }: { game: Game | null; onClose: () => void }
             CLOSE
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function GamePlayer({
+  game,
+  onExit,
+}: {
+  game: Game | null;
+  onExit: () => void;
+}) {
+  if (!game) return null;
+
+  const GameComponent = GAME_COMPONENTS[game.id];
+
+  return (
+    <div style={{
+      position: "fixed",
+      inset: 0,
+      zIndex: 200,
+      background: "#020810",
+      display: "flex",
+      flexDirection: "column",
+    }}>
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "16px 20px",
+        borderBottom: `1px solid ${game.color}44`,
+        background: "#050d1a",
+        boxShadow: `0 10px 30px ${game.color}22`,
+      }}>
+        <div>
+          <div style={{
+            fontFamily: "'Press Start 2P', monospace",
+            fontSize: 12,
+            color: game.color,
+            letterSpacing: 2,
+            marginBottom: 6,
+          }}>
+            {game.title}
+          </div>
+          <div style={{
+            fontFamily: "monospace",
+            fontSize: 10,
+            color: "#7f8ea3",
+            letterSpacing: 1,
+          }}>
+            GOAL: {game.goal} | REWARD: {game.reward}
+          </div>
+        </div>
+
+        <button
+          onClick={onExit}
+          style={{
+            padding: "10px 14px",
+            border: `1px solid ${game.color}55`,
+            background: "transparent",
+            color: game.color,
+            borderRadius: 4,
+            fontFamily: "monospace",
+            letterSpacing: 1,
+            cursor: "pointer",
+          }}
+        >
+          EXIT GAME
+        </button>
+      </div>
+
+      <div style={{ flex: 1, minHeight: 0 }}>
+        {GameComponent ? (
+          <GameComponent onExit={onExit} />
+        ) : (
+          <div style={{
+            height: "100%",
+            display: "grid",
+            placeItems: "center",
+            padding: 24,
+          }}>
+            <div style={{
+              maxWidth: 560,
+              textAlign: "center",
+              border: "1px solid #22354d",
+              background: "#07111f",
+              padding: 24,
+              borderRadius: 8,
+              fontFamily: "monospace",
+            }}>
+              <div style={{
+                color: game.color,
+                fontSize: 14,
+                letterSpacing: 2,
+                marginBottom: 12,
+              }}>
+                GAME NOT WIRED YET
+              </div>
+              <div style={{ color: "#91a0b5", fontSize: 12, lineHeight: 1.7 }}>
+                Add the React game component for {game.title} to the launcher map and it will render here.
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -499,6 +662,7 @@ function Stars() {
 
 export default function RetroRumble() {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [activeGame, setActiveGame] = useState<Game | null>(null);
 
   return (
     <>
@@ -600,7 +764,15 @@ export default function RetroRumble() {
         </div>
       </div>
 
-      <GameModal game={selectedGame} onClose={() => setSelectedGame(null)} />
+      <GameModal
+        game={selectedGame}
+        onClose={() => setSelectedGame(null)}
+        onPlay={(game) => {
+          setSelectedGame(null);
+          setActiveGame(game);
+        }}
+      />
+      <GamePlayer game={activeGame} onExit={() => setActiveGame(null)} />
     </>
   );
 }
