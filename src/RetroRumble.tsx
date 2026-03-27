@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import SolarSmashGame from "./games/SolarSmashGame";
 import AsteroidDestroyerGame from "./games/AsteroidDestroyerGame";
 import TetrisGame from "./games/TetrisGame";
+import FlappyDroneGame from "./games/FlappyDroneGame";
 
 // ─── Pixel Art Previews ───────────────────────────────────────────────────────
 
@@ -208,7 +209,7 @@ const GAMES: Game[] = [
     reward: "Jumper Wires & Resistors",
     rewardIcon: "〰️",
     description: "Navigate the drone through obstacles. Score 15 to unlock the next challenge.",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "pacman",
@@ -265,6 +266,7 @@ const PREVIEWS: Record<string, React.ReactElement> = {
 };
 
 const GAME_COMPONENTS: Partial<Record<string, ({ onExit }: { onExit: () => void }) => React.ReactElement>> = {
+  flappy: FlappyDroneGame,
   solar: SolarSmashGame,
   tetris: TetrisGame,
   asteroid: AsteroidDestroyerGame,
