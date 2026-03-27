@@ -8,6 +8,7 @@ import './pacman/pacman.css';
 
 type PacmanGameProps = {
   onExit: () => void;
+  onMissionComplete: () => void;
 };
 
 function ensureTailwindLoaded() {
@@ -34,7 +35,7 @@ function ensureTailwindLoaded() {
   }
 }
 
-export default function PacmanGame({ onExit }: PacmanGameProps) {
+export default function PacmanGame({ onExit, onMissionComplete }: PacmanGameProps) {
   const [status, setStatus] = useState<GameStatus>('START');
   const [teamName, setTeamName] = useState('PLAYER');
   const [finalScore, setFinalScore] = useState(0);
@@ -55,6 +56,7 @@ export default function PacmanGame({ onExit }: PacmanGameProps) {
 
   const handleGameWin = (score: number) => {
     setFinalScore(score);
+    onMissionComplete();
     setStatus('BREADBOARD');
   };
 

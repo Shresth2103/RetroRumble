@@ -3,10 +3,12 @@ import { mountAsteroidDestroyer } from "./asteroidDestroyer";
 
 type AsteroidDestroyerGameProps = {
   onExit: () => void;
+  onMissionComplete: () => void;
 };
 
 export default function AsteroidDestroyerGame({
   onExit,
+  onMissionComplete,
 }: AsteroidDestroyerGameProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -17,6 +19,7 @@ export default function AsteroidDestroyerGame({
 
     const app = mountAsteroidDestroyer(containerRef.current, {
       autoStart: false,
+      onMissionComplete,
     });
 
     return () => {

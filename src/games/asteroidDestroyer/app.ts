@@ -4,6 +4,7 @@ import { PHYSICS, LASER } from "./config/physics";
 
 export interface MountAsteroidDestroyerOptions {
   autoStart?: boolean;
+  onMissionComplete?: () => void;
 }
 
 export interface AsteroidDestroyerApp {
@@ -195,6 +196,7 @@ export function mountAsteroidDestroyer(
   engine.onGameOver = (score) => {
     setVisibility(hud, false);
     if (score >= 2000) {
+      options.onMissionComplete?.();
       setVisibility(congratsScreen, true);
       congratsScore.textContent = score.toString();
       return;

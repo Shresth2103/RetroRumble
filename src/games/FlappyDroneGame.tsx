@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 type FlappyDroneGameProps = {
   onExit: () => void;
+  onMissionComplete: () => void;
 };
 
 const W = 480;
@@ -164,9 +165,10 @@ function makeCars(): Car[] {
   ];
 }
 
-export default function FlappyDroneGame({ onExit }: FlappyDroneGameProps) {
+export default function FlappyDroneGame({ onExit, onMissionComplete }: FlappyDroneGameProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
+  const missionReportedRef = useRef(false);
   const stateRef = useRef<InternalState>({
     gameState: "idle",
     score: 0,
@@ -189,6 +191,7 @@ export default function FlappyDroneGame({ onExit }: FlappyDroneGameProps) {
 
   const resetGame = useCallback(() => {
     const state = stateRef.current;
+    missionReportedRef.current = false;
     state.drone = { x: 110, y: H / 2, vy: 0, tilt: 0 };
     state.score = 0;
     state.buildings = [makeBuilding()];
@@ -735,6 +738,10 @@ export default function FlappyDroneGame({ onExit }: FlappyDroneGameProps) {
             }
 
             if (state.score === 15) {
+              if (!missionReportedRef.current) {
+                missionReportedRef.current = true;
+                onMissionComplete();
+              }
               state.gameState = "won";
               setUiState((current) => ({
                 ...current,

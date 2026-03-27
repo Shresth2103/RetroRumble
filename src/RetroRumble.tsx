@@ -190,40 +190,46 @@ interface Game {
   glowColor: string;
   borderColor: string;
   locked: boolean;
-  goal: number;
+  completed?: boolean;
+  goal: string;
   reward: string;
   rewardIcon: string;
+  completionCriteria: string;
   description: string;
   implemented?: boolean;
 }
 
+const MISSION_PROGRESS_STORAGE_KEY = "rr-mission-progress-v1";
+
 const GAMES: Game[] = [
-  {
-    id: "flappy",
-    title: "FLAPPY DRONE",
-    subtitle: "MISSION 01",
-    color: "#00CFFF",
-    glowColor: "#00CFFF",
-    borderColor: "#00CFFF",
-    locked: false,
-    goal: 15,
-    reward: "Jumper Wires & Resistors",
-    rewardIcon: "〰️",
-    description: "Navigate the drone through obstacles. Score 15 to unlock the next challenge.",
-    implemented: true,
-  },
   {
     id: "pacman",
     title: "PAC-MAN",
-    subtitle: "MISSION 02",
+    subtitle: "MISSION 01",
     color: "#FFD700",
     glowColor: "#FFD700",
     borderColor: "#FFD700",
     locked: false,
-    goal: 20,
+    goal: "CLEAR ROUND 2",
     reward: "Breadboard",
     rewardIcon: "🔲",
-    description: "Eat all the dots and avoid the ghosts. Score 20 to claim your reward.",
+    completionCriteria: "Level clearance",
+    description: "Clear both Pac-Man rounds to unlock the breadboard and open the next mission.",
+    implemented: true,
+  },
+  {
+    id: "flappy",
+    title: "FLAPPY DRONE",
+    subtitle: "MISSION 02",
+    color: "#00CFFF",
+    glowColor: "#00CFFF",
+    borderColor: "#00CFFF",
+    locked: false,
+    goal: "15 POINTS",
+    reward: "Jumper Wires + Resistor",
+    rewardIcon: "〰️",
+    completionCriteria: "Predefined score",
+    description: "Navigate the drone through obstacles and reach 15 points to unlock the next mission.",
     implemented: true,
   },
   {
@@ -234,10 +240,11 @@ const GAMES: Game[] = [
     glowColor: "#00FF41",
     borderColor: "#00FF41",
     locked: false,
-    goal: 300,
-    reward: "RGB Lights",
+    goal: "300 POINTS",
+    reward: "RGB LED",
     rewardIcon: "💡",
-    description: "Stack the blocks and clear lines. Score 300 to light up your build.",
+    completionCriteria: "Predefined score",
+    description: "Stack the blocks and clear lines. Reach 300 points to unlock the RGB LED reward.",
     implemented: true,
   },
   {
@@ -248,13 +255,51 @@ const GAMES: Game[] = [
     glowColor: "#4F7DF3",
     borderColor: "#4F7DF3",
     locked: false,
-    goal: 2000,
+    goal: "2000 POINTS",
     reward: "Buzzer",
     rewardIcon: "🔔",
-    description: "Pilot your ship through an asteroid storm. Reach 2000 points to claim your buzzer.",
+    completionCriteria: "Predefined score",
+    description: "Current slot 4 implementation: reach 2000 points in Asteroid Destroyer to claim the buzzer.",
     implemented: true,
   },
 ];
+
+type MissionProgress = Record<string, boolean>;
+
+function readMissionProgress(): MissionProgress {
+  if (typeof window === "undefined") {
+    return {};
+  }
+
+  try {
+    const raw = window.localStorage.getItem(MISSION_PROGRESS_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as MissionProgress) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeMissionProgress(progress: MissionProgress) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(MISSION_PROGRESS_STORAGE_KEY, JSON.stringify(progress));
+}
+
+function buildGames(progress: MissionProgress) {
+  return GAMES.map((game, index) => {
+    const previousGame = GAMES[index - 1];
+    const completed = !!progress[game.id];
+    const locked = index > 0 && !progress[previousGame.id];
+
+    return {
+      ...game,
+      completed,
+      locked,
+    };
+  });
+}
 
 // ─── Preview lookup (JSX lives here, separate from data) ─────────────────────
 
@@ -266,10 +311,14 @@ const PREVIEWS: Record<string, React.ReactElement> = {
   asteroid: <AsteroidPreview />,
 };
 
-const GAME_COMPONENTS: Partial<Record<string, ({ onExit }: { onExit: () => void }) => React.ReactElement>> = {
+type PlayableGameProps = {
+  onExit: () => void;
+  onMissionComplete: () => void;
+};
+
+const GAME_COMPONENTS: Partial<Record<string, (props: PlayableGameProps) => React.ReactElement>> = {
   flappy: FlappyDroneGame,
   pacman: PacmanGame,
-  solar: SolarSmashGame,
   tetris: TetrisGame,
   asteroid: AsteroidDestroyerGame,
 };
@@ -346,7 +395,7 @@ function GameCard({ game, onSelect, isActive }: { game: Game; onSelect: (g: Game
           fontSize: 9,
           color: game.locked ? "#333" : `${game.color}99`,
           letterSpacing: 1,
-        }}>{game.subtitle}</span>
+        }}>{game.completed ? "COMPLETE" : game.subtitle}</span>
       </div>
 
       {/* Preview */}
@@ -363,7 +412,7 @@ function GameCard({ game, onSelect, isActive }: { game: Game; onSelect: (g: Game
         display: "flex", justifyContent: "space-between", alignItems: "center",
       }}>
         <span style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: 1, color: game.locked ? "#333" : "#777" }}>
-          GOAL: {game.goal} PTS
+          GOAL: {game.goal}
         </span>
         <span style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: 1, color: game.locked ? "#333" : `${game.color}cc` }}>
           {game.rewardIcon} {game.reward}
@@ -417,7 +466,7 @@ function GameModal({
           textShadow: `0 0 20px ${game.color}`,
         }}>{game.title}</div>
         <div style={{ color: `${game.color}88`, fontSize: 10, letterSpacing: 2, marginBottom: 20 }}>
-          {game.subtitle} — STATUS: UNLOCKED
+          {game.subtitle} — STATUS: {game.completed ? "COMPLETED" : "UNLOCKED"}
         </div>
 
         <div style={{ height: 180, border: `1px solid ${game.color}33`, borderRadius: 4, marginBottom: 20, overflow: "hidden" }}>
@@ -439,7 +488,7 @@ function GameModal({
             {game.rewardIcon} {game.reward}
           </div>
           <div style={{ color: "#556", fontSize: 10, marginTop: 4 }}>
-            Claim at the organiser desk after scoring {game.goal}+
+            Criteria: {game.completionCriteria} • Goal: {game.goal}
           </div>
         </div>
 
@@ -481,9 +530,11 @@ function GameModal({
 function GamePlayer({
   game,
   onExit,
+  onMissionComplete,
 }: {
   game: Game | null;
   onExit: () => void;
+  onMissionComplete: (gameId: string) => void;
 }) {
   if (!game) return null;
 
@@ -546,7 +597,10 @@ function GamePlayer({
 
       <div style={{ flex: 1, minHeight: 0 }}>
         {GameComponent ? (
-          <GameComponent onExit={onExit} />
+          <GameComponent
+            onExit={onExit}
+            onMissionComplete={() => onMissionComplete(game.id)}
+          />
         ) : (
           <div style={{
             height: "100%",
@@ -584,7 +638,9 @@ function GamePlayer({
 
 // ─── Circuit Progress Bar ─────────────────────────────────────────────────────
 
-function CircuitProgress({ value = 25 }: { value?: number }) {
+function CircuitProgress({ completedCount, totalCount }: { completedCount: number; totalCount: number }) {
+  const value = Math.round((completedCount / totalCount) * 100);
+
   return (
     <div style={{ textAlign: "center", marginBottom: 32 }}>
       <div style={{ fontFamily: "monospace", fontSize: 10, letterSpacing: 4, color: "#00FF41", marginBottom: 10 }}>
@@ -619,7 +675,7 @@ function CircuitProgress({ value = 25 }: { value?: number }) {
         }}>{value}%</span>
       </div>
       <div style={{ fontFamily: "monospace", fontSize: 9, color: "#446", marginTop: 8, letterSpacing: 2 }}>
-        1 / 4 MISSIONS COMPLETE
+        {completedCount} / {totalCount} MISSIONS COMPLETE
       </div>
     </div>
   );
@@ -667,6 +723,23 @@ function Stars() {
 export default function RetroRumble() {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [activeGame, setActiveGame] = useState<Game | null>(null);
+  const [missionProgress, setMissionProgress] = useState<MissionProgress>(() => readMissionProgress());
+
+  const games = buildGames(missionProgress);
+  const completedCount = games.filter((game) => game.completed).length;
+  const activeMission = games.find((game) => !game.completed);
+
+  const handleMissionComplete = (gameId: string) => {
+    setMissionProgress((current) => {
+      if (current[gameId]) {
+        return current;
+      }
+
+      const next = { ...current, [gameId]: true };
+      writeMissionProgress(next);
+      return next;
+    });
+  };
 
   return (
     <>
@@ -720,23 +793,25 @@ export default function RetroRumble() {
         {/* Body */}
         <div style={{ maxWidth: 960, margin: "0 auto", padding: "36px 20px 0" }}>
 
-          <CircuitProgress value={25} />
+          <CircuitProgress completedCount={completedCount} totalCount={games.length} />
 
           {/* Active mission banner */}
           <div style={{
-            border: "1px solid #00CFFF44",
-            background: "#00CFFF08",
+            border: `1px solid ${(activeMission?.color ?? "#00FF41")}44`,
+            background: `${activeMission?.color ?? "#00FF41"}08`,
             borderRadius: 4,
             padding: "12px 20px",
             marginBottom: 28,
             display: "flex", alignItems: "center", gap: 12,
             fontFamily: "monospace",
           }}>
-            <span style={{ color: "#00CFFF", fontSize: 11, animation: "blink 1.2s step-end infinite" }}>▶</span>
+            <span style={{ color: activeMission?.color ?? "#00FF41", fontSize: 11, animation: "blink 1.2s step-end infinite" }}>▶</span>
             <div>
-              <span style={{ color: "#00CFFF", fontSize: 10, letterSpacing: 2 }}>ACTIVE MISSION: </span>
+              <span style={{ color: activeMission?.color ?? "#00FF41", fontSize: 10, letterSpacing: 2 }}>ACTIVE MISSION: </span>
               <span style={{ color: "#fff", fontSize: 10, letterSpacing: 1 }}>
-                FLAPPY DRONE — Score 15 to unlock the next challenge
+                {activeMission
+                  ? `${activeMission.title} — ${activeMission.completionCriteria}: ${activeMission.goal}`
+                  : "ALL MISSIONS COMPLETE — Circuit build is fully unlocked"}
               </span>
             </div>
           </div>
@@ -747,12 +822,12 @@ export default function RetroRumble() {
             gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: 20,
           }}>
-            {GAMES.map((game) => (
+            {games.map((game) => (
               <GameCard
                 key={game.id}
                 game={game}
                 onSelect={setSelectedGame}
-                isActive={!game.locked}
+                isActive={activeMission?.id === game.id}
               />
             ))}
           </div>
@@ -776,7 +851,11 @@ export default function RetroRumble() {
           setActiveGame(game);
         }}
       />
-      <GamePlayer game={activeGame} onExit={() => setActiveGame(null)} />
+      <GamePlayer
+        game={activeGame}
+        onExit={() => setActiveGame(null)}
+        onMissionComplete={handleMissionComplete}
+      />
     </>
   );
 }

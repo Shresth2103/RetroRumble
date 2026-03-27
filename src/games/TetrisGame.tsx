@@ -13,9 +13,10 @@ import { useStage } from "./tetris/useStage";
 
 type TetrisGameProps = {
   onExit: () => void;
+  onMissionComplete: () => void;
 };
 
-export default function TetrisGame({ onExit }: TetrisGameProps) {
+export default function TetrisGame({ onExit, onMissionComplete }: TetrisGameProps) {
   const [dropTime, setDropTime] = useState<number | null>(null);
   const [gameOver, setGameOver] = useState(false);
   const [hasWon, setHasWon] = useState(false);
@@ -26,6 +27,7 @@ export default function TetrisGame({ onExit }: TetrisGameProps) {
   >([]);
 
   const gameAreaRef = useRef<HTMLDivElement>(null);
+  const missionReportedRef = useRef(false);
   const [player, updatePlayerPos, resetPlayer, playerRotate] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
 
@@ -40,6 +42,13 @@ export default function TetrisGame({ onExit }: TetrisGameProps) {
       setDropTime(null);
     }
   }, [hasWon, score]);
+
+  useEffect(() => {
+    if (hasWon && !missionReportedRef.current) {
+      missionReportedRef.current = true;
+      onMissionComplete();
+    }
+  }, [hasWon, onMissionComplete]);
 
   useEffect(() => {
     if (rowsCleared > 0) {
@@ -60,6 +69,7 @@ export default function TetrisGame({ onExit }: TetrisGameProps) {
   }, [rowsCleared]);
 
   const startGame = () => {
+    missionReportedRef.current = false;
     setStage(createStage());
     setDropTime(800);
     resetPlayer();
