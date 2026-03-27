@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.pixel-font {
+  font-family: 'Press Start 2P', monospace;
+}
+
+.animate-fade-in {
+  animation: rrPacmanFadeIn 0.5s ease-in-out;
+}
+
+@keyframes rrPacmanFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rr-pacman-root {
+  position: relative;
+  min-height: 100%;
+  background: radial-gradient(circle at top left, rgba(255, 215, 0, 0.12), transparent 25%), #000;
+  overflow: auto;
+}
+
+.rr-pacman-shell {
+  min-height: calc(100vh - 72px);
+  display: grid;
+  place-items: center;
+  padding: 72px 16px 24px;
+}
+
+.rr-pacman-exit {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 120;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 215, 0, 0.6);
+  background: rgba(0, 0, 0, 0.75);
+  color: #ffd700;
+  border-radius: 4px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.rr-pacman-exit:hover {
+  background: rgba(22, 22, 22, 0.9);
+}

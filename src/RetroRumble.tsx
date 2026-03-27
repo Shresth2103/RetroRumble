@@ -3,6 +3,7 @@ import SolarSmashGame from "./games/SolarSmashGame";
 import AsteroidDestroyerGame from "./games/AsteroidDestroyerGame";
 import TetrisGame from "./games/TetrisGame";
 import FlappyDroneGame from "./games/FlappyDroneGame";
+import PacmanGame from "./games/PacmanGame";
 
 // ─── Pixel Art Previews ───────────────────────────────────────────────────────
 
@@ -218,12 +219,12 @@ const GAMES: Game[] = [
     color: "#FFD700",
     glowColor: "#FFD700",
     borderColor: "#FFD700",
-    locked: true,
+    locked: false,
     goal: 20,
     reward: "Breadboard",
     rewardIcon: "🔲",
     description: "Eat all the dots and avoid the ghosts. Score 20 to claim your reward.",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "tetris",
@@ -267,6 +268,7 @@ const PREVIEWS: Record<string, React.ReactElement> = {
 
 const GAME_COMPONENTS: Partial<Record<string, ({ onExit }: { onExit: () => void }) => React.ReactElement>> = {
   flappy: FlappyDroneGame,
+  pacman: PacmanGame,
   solar: SolarSmashGame,
   tetris: TetrisGame,
   asteroid: AsteroidDestroyerGame,
