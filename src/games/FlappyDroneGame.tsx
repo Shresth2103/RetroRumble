@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 type FlappyDroneGameProps = {
   onExit: () => void;
   onMissionComplete: () => void;
+  onNextGame: () => void;
+  hasNextGame: boolean;
 };
 
 const W = 480;
@@ -165,7 +167,7 @@ function makeCars(): Car[] {
   ];
 }
 
-export default function FlappyDroneGame({ onExit, onMissionComplete }: FlappyDroneGameProps) {
+export default function FlappyDroneGame({ onExit, onMissionComplete, onNextGame, hasNextGame }: FlappyDroneGameProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const missionReportedRef = useRef(false);
@@ -1051,7 +1053,7 @@ export default function FlappyDroneGame({ onExit, onMissionComplete }: FlappyDro
                 JUMPER WIRES &amp; RESISTORS
               </div>
               <button
-                onClick={onExit}
+                onClick={hasNextGame ? onNextGame : onExit}
                 style={{
                   width: "100%",
                   padding: "12px 0",
@@ -1067,7 +1069,7 @@ export default function FlappyDroneGame({ onExit, onMissionComplete }: FlappyDro
                   boxShadow: "0 0 20px #00ffcc55, 0 4px 16px #00aaff33",
                 }}
               >
-                RETURN TO HUB
+                {hasNextGame ? "NEXT GAME" : "RETURN TO HUB"}
               </button>
             </div>
           </div>

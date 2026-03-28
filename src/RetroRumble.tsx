@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import SolarSmashGame from "./games/SolarSmashGame";
 import AsteroidDestroyerGame from "./games/AsteroidDestroyerGame";
 import TetrisGame from "./games/TetrisGame";
 import FlappyDroneGame from "./games/FlappyDroneGame";
@@ -314,6 +313,8 @@ const PREVIEWS: Record<string, React.ReactElement> = {
 type PlayableGameProps = {
   onExit: () => void;
   onMissionComplete: () => void;
+  onNextGame: () => void;
+  hasNextGame: boolean;
 };
 
 const GAME_COMPONENTS: Partial<Record<string, (props: PlayableGameProps) => React.ReactElement>> = {
@@ -546,10 +547,14 @@ function GamePlayer({
   game,
   onExit,
   onMissionComplete,
+  onNextGame,
+  hasNextGame,
 }: {
   game: Game | null;
   onExit: () => void;
   onMissionComplete: (gameId: string) => void;
+  onNextGame: (gameId: string) => void;
+  hasNextGame: boolean;
 }) {
   if (!game) return null;
 
@@ -615,6 +620,8 @@ function GamePlayer({
           <GameComponent
             onExit={onExit}
             onMissionComplete={() => onMissionComplete(game.id)}
+            onNextGame={() => onNextGame(game.id)}
+            hasNextGame={hasNextGame}
           />
         ) : (
           <div style={{
@@ -913,6 +920,15 @@ export default function RetroRumble() {
     });
   };
 
+  const handleNextGame = (gameId: string) => {
+    const progressAfterWin = { ...missionProgress, [gameId]: true };
+    const gameListAfterWin = buildGames(progressAfterWin);
+    const currentIndex = gameListAfterWin.findIndex((entry) => entry.id === gameId);
+    const nextGame = currentIndex >= 0 ? gameListAfterWin[currentIndex + 1] : null;
+
+    setActiveGame(nextGame ?? null);
+  };
+
   return (
     <>
       <style>{`
@@ -1053,6 +1069,8 @@ export default function RetroRumble() {
         game={activeGame}
         onExit={() => setActiveGame(null)}
         onMissionComplete={handleMissionComplete}
+        onNextGame={handleNextGame}
+        hasNextGame={activeGame ? GAMES.findIndex((entry) => entry.id === activeGame.id) < GAMES.length - 1 : false}
       />
     </>
   );

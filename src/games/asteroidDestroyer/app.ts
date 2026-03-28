@@ -5,6 +5,8 @@ import { PHYSICS, LASER } from "./config/physics";
 export interface MountAsteroidDestroyerOptions {
   autoStart?: boolean;
   onMissionComplete?: () => void;
+  onNextGame?: () => void;
+  hasNextGame?: boolean;
 }
 
 export interface AsteroidDestroyerApp {
@@ -72,6 +74,7 @@ const template = `
               <strong class="ad-reward-item">BUZZER</strong>
               <p class="ad-reward-copy">A piezo buzzer has been unlocked for your circuit build.</p>
             </div>
+            <button data-role="next-btn" class="ad-primary-btn ad-next-btn hidden" type="button">NEXT GAME</button>
             <div class="ad-congrats-icon">🏆</div>
           </div>
         </div>
@@ -107,6 +110,7 @@ export function mountAsteroidDestroyer(
   const finalScore = root.querySelector('[data-role="final-score"]') as HTMLElement;
   const congratsScreen = root.querySelector('[data-role="congrats-screen"]') as HTMLElement;
   const congratsScore = root.querySelector('[data-role="congrats-score"]') as HTMLElement;
+  const nextBtn = root.querySelector('[data-role="next-btn"]') as HTMLButtonElement | null;
   const toastContainer = root.querySelector('[data-role="toast-container"]') as HTMLElement;
 
   const keys: Record<string, boolean> = {};
@@ -135,6 +139,7 @@ export function mountAsteroidDestroyer(
   };
 
   const timeNow = () => performance.now();
+  const handleNextGame = () => options.onNextGame?.();
 
   const handleInput = (dt: number) => {
     if (engine.state.status !== "PLAYING" || !engine.state.ship) {
@@ -181,6 +186,7 @@ export function mountAsteroidDestroyer(
 
   startBtn.addEventListener("click", startGame);
   restartBtn.addEventListener("click", startGame);
+  nextBtn?.addEventListener("click", handleNextGame);
   window.addEventListener("keydown", handleKeyDown);
   window.addEventListener("keyup", handleKeyUp);
   resizeObserver.observe(root);
@@ -204,6 +210,9 @@ export function mountAsteroidDestroyer(
       options.onMissionComplete?.();
       setVisibility(congratsScreen, true);
       congratsScore.textContent = score.toString();
+      if (nextBtn) {
+        setVisibility(nextBtn, !!options.hasNextGame);
+      }
       return;
     }
 
@@ -233,6 +242,7 @@ export function mountAsteroidDestroyer(
       window.removeEventListener("keyup", handleKeyUp);
       startBtn.removeEventListener("click", startGame);
       restartBtn.removeEventListener("click", startGame);
+      nextBtn?.removeEventListener("click", handleNextGame);
       engine.destroy();
       container.innerHTML = "";
     },

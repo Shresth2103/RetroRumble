@@ -6,11 +6,13 @@ interface LeaderboardScreenProps {
   currentScore: number;
   teamName: string;
   onRestart: () => void;
+  onNextGame: () => void;
   isGameOver: boolean; // Distinction between just viewing scores vs dying
   isVictory?: boolean;
+  hasNextGame: boolean;
 }
 
-const LeaderboardScreen = ({ currentScore, teamName, onRestart, isGameOver, isVictory }: LeaderboardScreenProps) => {
+const LeaderboardScreen = ({ currentScore, teamName, onRestart, onNextGame, isGameOver, isVictory, hasNextGame }: LeaderboardScreenProps) => {
   const [scores, setScores] = useState<HighScore[]>([]);
 
   useEffect(() => {
@@ -59,12 +61,22 @@ const LeaderboardScreen = ({ currentScore, teamName, onRestart, isGameOver, isVi
         </div>
       </div>
 
-      <button
-        onClick={onRestart}
-        className="mt-10 bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-6 px-12 rounded-lg pixel-font text-xl md:text-2xl transition-transform active:scale-95 shadow-[0_0_15px_rgba(234,179,8,0.6)]"
-      >
-        PLAY AGAIN
-      </button>
+      <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+        {isVictory && hasNextGame && (
+          <button
+            onClick={onNextGame}
+            className="bg-green-500 hover:bg-green-400 text-black font-bold py-6 px-10 rounded-lg pixel-font text-lg md:text-xl transition-transform active:scale-95 shadow-[0_0_15px_rgba(34,197,94,0.6)]"
+          >
+            NEXT GAME
+          </button>
+        )}
+        <button
+          onClick={onRestart}
+          className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-6 px-12 rounded-lg pixel-font text-xl md:text-2xl transition-transform active:scale-95 shadow-[0_0_15px_rgba(234,179,8,0.6)]"
+        >
+          PLAY AGAIN
+        </button>
+      </div>
     </div>
   );
 };
