@@ -68,6 +68,7 @@ type MutableGameState = {
   rgbUnlocked: boolean;
   lastDrop: number;
   rafId: number | null;
+  clearAnimInterval: ReturnType<typeof setInterval> | null;
   DAS_timer: ReturnType<typeof setTimeout> | null;
   DAS_interval: ReturnType<typeof setInterval> | null;
 };
@@ -88,7 +89,7 @@ type UiState = {
 
 const PIECE_TYPES = Object.keys(SHAPES);
 const LINE_SCORES = [0, 100, 300, 500, 800];
-const RGB_UNLOCK_SCORE = 600;
+const RGB_UNLOCK_SCORE = 300;
 
 // ─── PURE HELPERS ─────────────────────────────────────────────────────────────
 function cloneShape(shape: Matrix): Matrix {
@@ -368,6 +369,7 @@ export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextG
     rgbUnlocked: false,
     lastDrop: 0,
     rafId: null,
+    clearAnimInterval: null,
     DAS_timer: null,
     DAS_interval: null,
   });
@@ -394,6 +396,30 @@ export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextG
       hiScore: g.hiScore, linesInLevel,
       gameState: g.gameState,
     }));
+  }, []);
+
+  const clearMovementTimers = useCallback(() => {
+    const g = gs.current;
+    if (g.DAS_timer !== null) {
+      clearTimeout(g.DAS_timer);
+      g.DAS_timer = null;
+    }
+    if (g.DAS_interval !== null) {
+      clearInterval(g.DAS_interval);
+      g.DAS_interval = null;
+    }
+  }, []);
+
+  const stopGameLoop = useCallback(() => {
+    const g = gs.current;
+    if (g.rafId !== null) {
+      cancelAnimationFrame(g.rafId);
+      g.rafId = null;
+    }
+    if (g.clearAnimInterval !== null) {
+      clearInterval(g.clearAnimInterval);
+      g.clearAnimInterval = null;
+    }
   }, []);
 
   // ── DRAW ──
@@ -469,10 +495,11 @@ export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextG
     const g = gs.current;
     g.rgbUnlocked = true;
     g.gameState = 'over';
-    if (g.rafId) cancelAnimationFrame(g.rafId);
+    stopGameLoop();
+    clearMovementTimers();
     onMissionComplete();
     setUi(prev => ({ ...prev, gameState: 'over', rgbVisible: true }));
-  }, [onMissionComplete]);
+  }, [onMissionComplete, stopGameLoop, clearMovementTimers]);
 
   const checkRgb = useCallback(() => {
     const g = gs.current;
@@ -494,13 +521,17 @@ export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextG
     let flash = 0;
     g.clearAnim = { rows: full, flash: 0 };
 
-    const flashInterval = setInterval(() => {
+    stopGameLoop();
+    g.clearAnimInterval = setInterval(() => {
       if (g.clearAnim) {
         g.clearAnim.flash = ++flash;
       }
       drawAll();
       if (flash >= 6) {
-        clearInterval(flashInterval);
+        if (g.clearAnimInterval !== null) {
+          clearInterval(g.clearAnimInterval);
+          g.clearAnimInterval = null;
+        }
         g.clearAnim = null;
         for (const r of full.slice().reverse()) g.board.splice(r, 1);
         while (g.board.length < ROWS) g.board.unshift(Array(COLS).fill(null));
@@ -513,7 +544,7 @@ export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextG
         if (!checkRgb()) spawnPiece();
       }
     }, 60);
-  }, [spawnPiece, drawAll, syncUi, checkRgb]);
+  }, [spawnPiece, drawAll, syncUi, checkRgb, stopGameLoop]);
 
   const lockPiece = useCallback(() => {
     const g = gs.current;
@@ -531,14 +562,15 @@ export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextG
   const doGameOver = useCallback(() => {
     const g = gs.current;
     g.gameState = 'over';
-    if (g.rafId) cancelAnimationFrame(g.rafId);
+    stopGameLoop();
+    clearMovementTimers();
     setUi(prev => ({
       ...prev, gameState: 'over',
       overlayTitle: 'GAME OVER',
       overlaySub: `SCORE: ${String(g.score).padStart(6,'0')}\nHIGH: ${String(g.hiScore).padStart(6,'0')}`,
       showButton: true, buttonLabel: 'PLAY AGAIN',
     }));
-  }, []);
+  }, [stopGameLoop, clearMovementTimers]);
 
   // ── TICK ──
   const tick = useCallback((now: number) => {
@@ -561,7 +593,8 @@ export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextG
   // ── INIT / START ──
   const startGame = useCallback(() => {
     const g = gs.current;
-    if (g.rafId) cancelAnimationFrame(g.rafId);
+    stopGameLoop();
+    clearMovementTimers();
     g.board = emptyBoard();
     g.score = 0; g.lines = 0; g.level = 1;
     g.hiScore = parseInt(localStorage.getItem('tetris_hi') || '0', 10);
@@ -578,7 +611,7 @@ export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextG
     spawnPiece();
     g.lastDrop = performance.now();
     g.rafId = requestAnimationFrame(tick);
-  }, [spawnPiece, tick]);
+  }, [spawnPiece, tick, stopGameLoop, clearMovementTimers]);
 
   // ── MOVES ──
   const moveLeft = useCallback(() => {
@@ -647,7 +680,8 @@ export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextG
     const g = gs.current;
     if (g.gameState === 'playing') {
       g.gameState = 'paused';
-      if (g.rafId) cancelAnimationFrame(g.rafId);
+      stopGameLoop();
+      clearMovementTimers();
       setUi(prev => ({
         ...prev, gameState: 'paused',
         overlayTitle: 'PAUSED', overlaySub: 'PRESS P TO RESUME',
@@ -659,7 +693,7 @@ export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextG
       g.rafId = requestAnimationFrame(tick);
       setUi(prev => ({ ...prev, gameState: 'playing' }));
     }
-  }, [tick]);
+  }, [tick, stopGameLoop, clearMovementTimers]);
 
   // ── KEYBOARD ──
   useEffect(() => {
@@ -676,15 +710,13 @@ export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextG
         case 'ArrowLeft':
           e.preventDefault();
           moveLeft();
-          if (g.DAS_timer !== null) clearTimeout(g.DAS_timer);
-          if (g.DAS_interval !== null) clearInterval(g.DAS_interval);
+          clearMovementTimers();
           g.DAS_timer = setTimeout(() => { g.DAS_interval = setInterval(moveLeft, DAS_REPEAT); }, DAS_DELAY);
           break;
         case 'ArrowRight':
           e.preventDefault();
           moveRight();
-          if (g.DAS_timer !== null) clearTimeout(g.DAS_timer);
-          if (g.DAS_interval !== null) clearInterval(g.DAS_interval);
+          clearMovementTimers();
           g.DAS_timer = setTimeout(() => { g.DAS_interval = setInterval(moveRight, DAS_REPEAT); }, DAS_DELAY);
           break;
         case 'ArrowDown': e.preventDefault(); softDrop(); break;
@@ -696,15 +728,19 @@ export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextG
 
     const onKeyUp = (e: KeyboardEvent) => {
       if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
-        if (g.DAS_timer !== null) clearTimeout(g.DAS_timer);
-        if (g.DAS_interval !== null) clearInterval(g.DAS_interval);
+        clearMovementTimers();
       }
     };
 
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
-    return () => { window.removeEventListener('keydown', onKeyDown); window.removeEventListener('keyup', onKeyUp); };
-  }, [startGame, pauseGame, moveLeft, moveRight, softDrop, hardDrop, tryRotate, holdPiece]);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+      stopGameLoop();
+      clearMovementTimers();
+    };
+  }, [startGame, pauseGame, moveLeft, moveRight, softDrop, hardDrop, tryRotate, holdPiece, stopGameLoop, clearMovementTimers]);
 
   // Initial canvas draw
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import AsteroidDestroyerGame from "./games/AsteroidDestroyerGame";
 import TetrisGame from "./games/TetrisGame";
 import FlappyDroneGame from "./games/FlappyDroneGame";
@@ -7,16 +7,6 @@ import PacmanGame from "./games/PacmanGame";
 // ─── Pixel Art Previews ───────────────────────────────────────────────────────
 
 function FlappyPreview() {
-  const [birdY, setBirdY] = useState(50);
-  useEffect(() => {
-    let t = 0;
-    const id = setInterval(() => {
-      t += 0.05;
-      setBirdY(50 + Math.sin(t) * 18);
-    }, 30);
-    return () => clearInterval(id);
-  }, []);
-
   return (
     <svg viewBox="0 0 180 100" width="100%" style={{ display: "block" }}>
       <rect width="180" height="100" fill="#0a1628" />
@@ -28,33 +18,21 @@ function FlappyPreview() {
       <rect x="130" y="62" width="18" height="38" fill="#00aa33" />
       <rect x="127" y="60" width="24" height="8" fill="#00cc44" />
       <rect x="0" y="92" width="180" height="8" fill="#1a3a1a" />
-      <rect x="30" y={birdY-6} width="22" height="10" fill="#00CFFF" rx="2"/>
-      <rect x="26" y={birdY-4} width="6" height="2" fill="#0088aa"/>
-      <rect x="50" y={birdY-4} width="6" height="2" fill="#0088aa"/>
-      <rect x="22" y={birdY-8} width="12" height="2" fill="#ffffff" opacity={0.8} rx="1"/>
-      <rect x="48" y={birdY-8} width="12" height="2" fill="#ffffff" opacity={0.8} rx="1"/>
-      <rect x="49" y={birdY-4} width="3" height="3" fill="#001122" rx="1"/>
-      <rect x="50" y={birdY-3} width="1" height="1" fill="#fff"/>
+      <rect x="30" y="44" width="22" height="10" fill="#00CFFF" rx="2"/>
+      <rect x="26" y="46" width="6" height="2" fill="#0088aa"/>
+      <rect x="50" y="46" width="6" height="2" fill="#0088aa"/>
+      <rect x="22" y="42" width="12" height="2" fill="#ffffff" opacity={0.8} rx="1"/>
+      <rect x="48" y="42" width="12" height="2" fill="#ffffff" opacity={0.8} rx="1"/>
+      <rect x="49" y="46" width="3" height="3" fill="#001122" rx="1"/>
+      <rect x="50" y="47" width="1" height="1" fill="#fff"/>
       <text x="10" y="20" fill="#00CFFF" fontSize="8" fontFamily="monospace">SCORE: 42</text>
     </svg>
   );
 }
 
 function PacmanPreview() {
-  const [mouth, setMouth] = useState(0.3);
-  const [dir, setDir] = useState(1);
-  useEffect(() => {
-    const id = setInterval(() => {
-      setMouth(m => {
-        if (m >= 0.45) { setDir(-1); return m - 0.05; }
-        if (m <= 0.05) { setDir(1); return m + 0.05; }
-        return m + dir * 0.05;
-      });
-    }, 50);
-    return () => clearInterval(id);
-  }, [dir]);
-
   const r = 18, cx = 55, cy = 50;
+  const mouth = 0.18;
   const startAngle = mouth * Math.PI;
   const endAngle = (2 - mouth) * Math.PI;
   const x1 = cx + r * Math.cos(startAngle);
@@ -109,12 +87,6 @@ function TetrisPreview() {
 }
 
 function SolarPreview() {
-  const [pulse, setPulse] = useState(1);
-  useEffect(() => {
-    let t = 0;
-    const id = setInterval(() => { t += 0.08; setPulse(1 + Math.sin(t) * 0.08); }, 40);
-    return () => clearInterval(id);
-  }, []);
   return (
     <svg viewBox="0 0 180 100" width="100%" style={{ display: "block" }}>
       <defs>
@@ -132,8 +104,8 @@ function SolarPreview() {
       {([[15,12],[40,8],[80,20],[120,5],[160,18],[170,60],[10,75],[50,85],[130,90]] as number[][]).map(([x,y],i)=>(
         <circle key={i} cx={x} cy={y} r={i%3===0?1.5:1} fill="#fff" opacity={0.5}/>
       ))}
-      <circle cx="30" cy="50" r={14*pulse} fill="url(#star)" />
-      <circle cx="30" cy="50" r={10*pulse} fill="#ffee44" />
+      <circle cx="30" cy="50" r="14" fill="url(#star)" />
+      <circle cx="30" cy="50" r="10" fill="#ffee44" />
       <circle cx="110" cy="50" r="28" fill="url(#planet)" />
       <ellipse cx="110" cy="50" rx="42" ry="10" fill="none" stroke="#7799ff" strokeWidth="2" opacity={0.5}/>
       <line x1="95" y1="30" x2="125" y2="70" stroke="#FF4444" strokeWidth="2" opacity={0.8}/>
@@ -144,24 +116,7 @@ function SolarPreview() {
 }
 
 function AsteroidPreview() {
-  const [shipX, setShipX] = useState(34);
-
-  useEffect(() => {
-    let direction = 1;
-    const id = setInterval(() => {
-      setShipX((value) => {
-        if (value >= 54) {
-          direction = -1;
-        } else if (value <= 30) {
-          direction = 1;
-        }
-
-        return value + direction * 1.5;
-      });
-    }, 40);
-
-    return () => clearInterval(id);
-  }, []);
+  const shipX = 42;
 
   return (
     <svg viewBox="0 0 180 100" width="100%" style={{ display: "block" }}>
