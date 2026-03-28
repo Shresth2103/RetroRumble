@@ -1,30 +1,36 @@
-export enum Direction {
-  UP = 'UP',
-  DOWN = 'DOWN',
-  LEFT = 'LEFT',
-  RIGHT = 'RIGHT',
-  NONE = 'NONE'
-}
+export const Direction = {
+  UP: 'UP',
+  DOWN: 'DOWN',
+  LEFT: 'LEFT',
+  RIGHT: 'RIGHT',
+  NONE: 'NONE',
+} as const;
+
+export type Direction = (typeof Direction)[keyof typeof Direction];
 
 export interface Position {
   x: number;
   y: number;
 }
 
-export enum TileType {
-  WALL = 0,
-  PELLET = 1,
-  EMPTY = 2,
-  POWER_PELLET = 3,
-  PACMAN_SPAWN = 9,
-  GHOST_SPAWN = 8,
-}
+export const TileType = {
+  WALL: 0,
+  PELLET: 1,
+  EMPTY: 2,
+  POWER_PELLET: 3,
+  PACMAN_SPAWN: 9,
+  GHOST_SPAWN: 8,
+} as const;
 
-export enum GhostStatus {
-  NORMAL = 'NORMAL',
-  VULNERABLE = 'VULNERABLE',
-  EATEN = 'EATEN'
-}
+export type TileType = (typeof TileType)[keyof typeof TileType];
+
+export const GhostStatus = {
+  NORMAL: 'NORMAL',
+  VULNERABLE: 'VULNERABLE',
+  EATEN: 'EATEN',
+} as const;
+
+export type GhostStatus = (typeof GhostStatus)[keyof typeof GhostStatus];
 
 export interface GhostEntity {
   id: number;

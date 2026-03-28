@@ -236,7 +236,7 @@ const GameScreen = ({ teamName, onGameOver, onGameWin }: GameScreenProps) => {
   // --- Input Handling ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      let newDir = Direction.NONE;
+      let newDir: Direction = Direction.NONE;
       switch (e.key) {
         case 'ArrowUp': case 'w': case 'W': newDir = Direction.UP; break;
         case 'ArrowDown': case 's': case 'S': newDir = Direction.DOWN; break;
@@ -440,7 +440,6 @@ const GameScreen = ({ teamName, onGameOver, onGameWin }: GameScreenProps) => {
     state.ghosts.forEach(ghost => {
        if (ghost.status === GhostStatus.EATEN) return;
 
-       const gMove = DIRECTIONS[ghost.direction];
        // We iterate movement to ensure we don't skip tile centers
        let distRemaining = ghostMoveFactor;
        let safetyCounter = 0;

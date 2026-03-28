@@ -37,7 +37,7 @@ function ensureTailwindLoaded() {
   }
 }
 
-export default function PacmanGame({ onExit, onMissionComplete, onNextGame, hasNextGame }: PacmanGameProps) {
+export default function PacmanGame({ onExit: _onExit, onMissionComplete, onNextGame, hasNextGame }: PacmanGameProps) {
   const [status, setStatus] = useState<GameStatus>('START');
   const [teamName, setTeamName] = useState('PLAYER');
   const [finalScore, setFinalScore] = useState(0);
@@ -73,10 +73,6 @@ export default function PacmanGame({ onExit, onMissionComplete, onNextGame, hasN
 
   return (
     <div className="rr-pacman-root">
-      <button className="rr-pacman-exit" onClick={onExit}>
-        BACK TO HUB
-      </button>
-
       <div className="rr-pacman-shell">
         {status === 'START' && <StartScreen onStart={handleStartGame} />}
 

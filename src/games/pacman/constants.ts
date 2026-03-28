@@ -1,4 +1,4 @@
-import { Direction, TileType } from './types';
+import { Direction } from './types';
 
 // 1 = Pellet, 0 = Wall, 9 = Pacman, 8 = Ghost, 3 = Power Pellet
 // 2 = Empty (runtime)
