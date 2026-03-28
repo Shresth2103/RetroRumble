@@ -67,6 +67,11 @@ const template = `
           </div>
           <div class="ad-congrats-body">
             <p class="ad-congrats-msg">Exceptional performance. You have ascended beyond the asteroid field and established your dominance in the galactic core.</p>
+            <div class="ad-reward-card">
+              <span class="ad-reward-label">MISSION REWARD</span>
+              <strong class="ad-reward-item">BUZZER</strong>
+              <p class="ad-reward-copy">A piezo buzzer has been unlocked for your circuit build.</p>
+            </div>
             <div class="ad-congrats-icon">🏆</div>
           </div>
         </div>
