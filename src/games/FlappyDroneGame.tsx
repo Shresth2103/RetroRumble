@@ -12,6 +12,7 @@ const H = 640;
 const GROUND = H - 52;
 const GAP = 130;
 const BUILDING_SPEED = 2.5;
+const FLAP_LIFT = 8;
 
 type Particle = {
   x: number;
@@ -214,7 +215,7 @@ export default function FlappyDroneGame({ onExit, onMissionComplete, onNextGame,
     }
 
     if (state.gameState === "playing") {
-      state.drone.vy = -6.5;
+      state.drone.vy = -FLAP_LIFT;
     }
   }, [resetGame]);
 
