@@ -270,6 +270,7 @@ type PlayableGameProps = {
   onMissionComplete: () => void;
   onNextGame: () => void;
   hasNextGame: boolean;
+  nextGameLabel: string | null;
 };
 
 const GAME_COMPONENTS: Partial<Record<string, (props: PlayableGameProps) => React.ReactElement>> = {
@@ -514,6 +515,8 @@ function GamePlayer({
   if (!game) return null;
 
   const GameComponent = GAME_COMPONENTS[game.id];
+  const currentIndex = GAMES.findIndex((entry) => entry.id === game.id);
+  const nextGameLabel = currentIndex >= 0 ? GAMES[currentIndex + 1]?.title ?? null : null;
 
   return (
     <div style={{
@@ -577,6 +580,7 @@ function GamePlayer({
             onMissionComplete={() => onMissionComplete(game.id)}
             onNextGame={() => onNextGame(game.id)}
             hasNextGame={hasNextGame}
+            nextGameLabel={nextGameLabel}
           />
         ) : (
           <div style={{

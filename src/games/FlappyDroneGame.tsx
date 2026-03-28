@@ -5,6 +5,7 @@ type FlappyDroneGameProps = {
   onMissionComplete: () => void;
   onNextGame: () => void;
   hasNextGame: boolean;
+  nextGameLabel: string | null;
 };
 
 const W = 480;
@@ -168,7 +169,7 @@ function makeCars(): Car[] {
   ];
 }
 
-export default function FlappyDroneGame({ onExit, onMissionComplete, onNextGame, hasNextGame }: FlappyDroneGameProps) {
+export default function FlappyDroneGame({ onExit, onMissionComplete, onNextGame, hasNextGame, nextGameLabel }: FlappyDroneGameProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const missionReportedRef = useRef(false);
@@ -1024,6 +1025,11 @@ export default function FlappyDroneGame({ onExit, onMissionComplete, onNextGame,
               <div style={{ fontSize: 11, letterSpacing: 4, color: "#00ffcc99", marginBottom: 4 }}>
                 MISSION COMPLETE · SCORE 15
               </div>
+              {hasNextGame && nextGameLabel && (
+                <div style={{ fontSize: 11, color: "#7cecff", letterSpacing: 2, marginBottom: 12 }}>
+                  NEXT UP: {nextGameLabel}
+                </div>
+              )}
               <h2
                 style={{
                   fontSize: 20,
@@ -1070,7 +1076,7 @@ export default function FlappyDroneGame({ onExit, onMissionComplete, onNextGame,
                   boxShadow: "0 0 20px #00ffcc55, 0 4px 16px #00aaff33",
                 }}
               >
-                {hasNextGame ? "NEXT GAME" : "RETURN TO HUB"}
+                {hasNextGame && nextGameLabel ? `PLAY ${nextGameLabel}` : hasNextGame ? "NEXT GAME" : "RETURN TO HUB"}
               </button>
             </div>
           </div>

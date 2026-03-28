@@ -11,6 +11,7 @@ type PacmanGameProps = {
   onMissionComplete: () => void;
   onNextGame: () => void;
   hasNextGame: boolean;
+  nextGameLabel: string | null;
 };
 
 function ensureTailwindLoaded() {
@@ -37,7 +38,7 @@ function ensureTailwindLoaded() {
   }
 }
 
-export default function PacmanGame({ onExit: _onExit, onMissionComplete, onNextGame, hasNextGame }: PacmanGameProps) {
+export default function PacmanGame({ onExit: _onExit, onMissionComplete, onNextGame, hasNextGame, nextGameLabel }: PacmanGameProps) {
   const [status, setStatus] = useState<GameStatus>('START');
   const [teamName, setTeamName] = useState('PLAYER');
   const [finalScore, setFinalScore] = useState(0);
@@ -97,6 +98,7 @@ export default function PacmanGame({ onExit: _onExit, onMissionComplete, onNextG
             isGameOver={status === 'LEADERBOARD'}
             isVictory={status === 'VICTORY'}
             hasNextGame={hasNextGame}
+            nextGameLabel={nextGameLabel}
           />
         )}
       </div>

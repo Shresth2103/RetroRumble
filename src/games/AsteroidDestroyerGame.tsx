@@ -6,6 +6,7 @@ type AsteroidDestroyerGameProps = {
   onMissionComplete: () => void;
   onNextGame: () => void;
   hasNextGame: boolean;
+  nextGameLabel: string | null;
 };
 
 export default function AsteroidDestroyerGame({
@@ -13,6 +14,7 @@ export default function AsteroidDestroyerGame({
   onMissionComplete,
   onNextGame,
   hasNextGame,
+  nextGameLabel: _nextGameLabel,
 }: AsteroidDestroyerGameProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 

@@ -6,6 +6,7 @@ type TetrisGameProps = {
   onMissionComplete: () => void;
   onNextGame: () => void;
   hasNextGame: boolean;
+  nextGameLabel: string | null;
 };
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
@@ -248,11 +249,13 @@ function RgbModal({
   onPlayAgain,
   onNextGame,
   hasNextGame,
+  nextGameLabel,
 }: {
   visible: boolean;
   onPlayAgain: () => void;
   onNextGame: () => void;
   hasNextGame: boolean;
+  nextGameLabel: string | null;
 }) {
   if (!visible) return null;
   return (
@@ -286,6 +289,11 @@ function RgbModal({
           <span style={{ color: '#bbb' }}>RGB LED</span> stands for <span style={{ color: '#bbb' }}>Red, Green, Blue</span> Light-Emitting Diode — a single LED that packs three tiny diodes inside one housing.<br /><br />
           By mixing those three channels at different intensities, it can produce <span style={{ color: '#bbb' }}>16 million+ colours</span>. Used in gaming setups, smart lighting, wearables, and electronics projects, RGB LEDs are controlled via PWM signals — the same tech that makes your screen glow.
         </div>
+        {hasNextGame && nextGameLabel && (
+          <div style={{ fontSize: 8, color: '#00ffcc', letterSpacing: 2, marginBottom: 18, fontFamily: "'Press Start 2P', monospace" }}>
+            NEXT UP: {nextGameLabel}
+          </div>
+        )}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
           {hasNextGame && (
             <button onClick={onNextGame} style={{
@@ -297,7 +305,7 @@ function RgbModal({
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,255,204,0.22)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,255,204,0.12)'; }}
             >
-              NEXT GAME
+              {nextGameLabel ? `PLAY ${nextGameLabel}` : 'NEXT GAME'}
             </button>
           )}
           <button onClick={onPlayAgain} style={{
@@ -350,7 +358,7 @@ function PanelValue({ children }: { children: ReactNode }) {
 }
 
 // ─── MAIN GAME ────────────────────────────────────────────────────────────────
-export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextGame, hasNextGame }: TetrisGameProps) {
+export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextGame, hasNextGame, nextGameLabel }: TetrisGameProps) {
   const canvasRef  = useRef<HTMLCanvasElement | null>(null);
   const nextRef    = useRef<HTMLCanvasElement | null>(null);
   const holdRef    = useRef<HTMLCanvasElement | null>(null);
@@ -871,6 +879,7 @@ export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextG
         onPlayAgain={startGame}
         onNextGame={onNextGame}
         hasNextGame={hasNextGame}
+        nextGameLabel={nextGameLabel}
       />
     </>
   );
