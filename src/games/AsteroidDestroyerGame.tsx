@@ -14,7 +14,6 @@ export default function AsteroidDestroyerGame({
   onMissionComplete,
   onNextGame,
   hasNextGame,
-  nextGameLabel: _nextGameLabel,
 }: AsteroidDestroyerGameProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -33,7 +32,7 @@ export default function AsteroidDestroyerGame({
     return () => {
       app.destroy();
     };
-  }, []);
+  }, [hasNextGame, onMissionComplete, onNextGame]);
 
   return (
     <div

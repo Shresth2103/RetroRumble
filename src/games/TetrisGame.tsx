@@ -358,7 +358,7 @@ function PanelValue({ children }: { children: ReactNode }) {
 }
 
 // ─── MAIN GAME ────────────────────────────────────────────────────────────────
-export default function TetrisGame({ onExit: _onExit, onMissionComplete, onNextGame, hasNextGame, nextGameLabel }: TetrisGameProps) {
+export default function TetrisGame({ onMissionComplete, onNextGame, hasNextGame, nextGameLabel }: TetrisGameProps) {
   const canvasRef  = useRef<HTMLCanvasElement | null>(null);
   const nextRef    = useRef<HTMLCanvasElement | null>(null);
   const holdRef    = useRef<HTMLCanvasElement | null>(null);

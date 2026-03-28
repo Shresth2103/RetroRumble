@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { HighScore } from '../types';
 import { getLeaderboard } from '../utils/storage';
 
@@ -14,11 +14,7 @@ interface LeaderboardScreenProps {
 }
 
 const LeaderboardScreen = ({ currentScore, teamName, onRestart, onNextGame, isGameOver, isVictory, hasNextGame, nextGameLabel }: LeaderboardScreenProps) => {
-  const [scores, setScores] = useState<HighScore[]>([]);
-
-  useEffect(() => {
-    setScores(getLeaderboard());
-  }, []);
+  const [scores] = useState<HighScore[]>(() => getLeaderboard());
 
   return (
     <div className="flex flex-col items-center justify-start w-full max-w-3xl mx-auto space-y-6 animate-fade-in px-4 py-6">

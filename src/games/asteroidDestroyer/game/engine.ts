@@ -1,6 +1,7 @@
 import { createInitialState } from "./state";
 import type { GameState } from "./state";
 import { Ship } from "../entities/ship";
+import type { PowerUpType } from "../entities/ship";
 import { Asteroid } from "../entities/asteroid";
 import type { AsteroidSize } from "../entities/asteroid";
 import { Laser } from "../entities/laser";
@@ -218,7 +219,7 @@ export class GameEngine {
   }
 
   splitAsteroid(parent: Asteroid, nextSize: AsteroidSize) {
-      const cfg = ASTEROID[parent.size] as any;
+      const cfg = ASTEROID[parent.size] as (typeof ASTEROID)["LARGE"] | (typeof ASTEROID)["MEDIUM"];
       const speed = parent.vel.mag() * (cfg.SPLIT_SPEED_MULT || 1.4);
       const baseAngle = parent.vel.toAngle();
       const spread = ((cfg.SPLIT_ANGLE || 30) * Math.PI) / 180;
@@ -234,7 +235,7 @@ export class GameEngine {
       for (const type of POWER_UP.TYPES) {
           const chance = POWER_UP.CHANCES[type as keyof typeof POWER_UP.CHANCES];
           if (Math.random() * 100 < chance) {
-              this.state.powerups.push(new PowerUp(pos.clone(), type as any));
+              this.state.powerups.push(new PowerUp(pos.clone(), type as PowerUpType));
               break; // Only spawn one power-up per asteroid destruction
           }
       }

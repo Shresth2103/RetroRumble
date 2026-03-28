@@ -556,21 +556,41 @@ function GamePlayer({
           </div>
         </div>
 
-        <button
-          onClick={onExit}
-          style={{
-            padding: "10px 14px",
-            border: `1px solid ${game.color}55`,
-            background: "transparent",
-            color: game.color,
-            borderRadius: 4,
-            fontFamily: "monospace",
-            letterSpacing: 1,
-            cursor: "pointer",
-          }}
-        >
-          EXIT GAME
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {hasNextGame && (
+            <button
+              onClick={() => onNextGame(game.id)}
+              style={{
+                padding: "10px 14px",
+                border: `1px solid ${game.color}88`,
+                background: `${game.color}18`,
+                color: game.color,
+                borderRadius: 4,
+                fontFamily: "monospace",
+                letterSpacing: 1,
+                cursor: "pointer",
+                boxShadow: `0 0 18px ${game.color}22`,
+              }}
+            >
+              {nextGameLabel ? `PLAY ${nextGameLabel}` : "PLAY NEXT"}
+            </button>
+          )}
+          <button
+            onClick={onExit}
+            style={{
+              padding: "10px 14px",
+              border: `1px solid ${game.color}55`,
+              background: "transparent",
+              color: game.color,
+              borderRadius: 4,
+              fontFamily: "monospace",
+              letterSpacing: 1,
+              cursor: "pointer",
+            }}
+          >
+            EXIT GAME
+          </button>
+        </div>
       </div>
 
       <div style={{ flex: 1, minHeight: 0 }}>

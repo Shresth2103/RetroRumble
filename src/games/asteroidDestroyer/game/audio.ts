@@ -9,7 +9,11 @@ export class AudioManager {
 
   private init() {
     if (this.ctx) return;
-    this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContextConstructor =
+      window.AudioContext ||
+      (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!audioContextConstructor) return;
+    this.ctx = new audioContextConstructor();
   }
 
   toggle(enabled: boolean) {

@@ -256,7 +256,7 @@ const GameScreen = ({ teamName, onGameOver, onGameWin }: GameScreenProps) => {
   const isValidMove = (grid: number[][], x: number, y: number, dir: Direction) => {
     const move = DIRECTIONS[dir];
     let nextX = Math.round(x + move.x);
-    let nextY = Math.round(y + move.y);
+    const nextY = Math.round(y + move.y);
 
     // Tunnel Wrapping
     if (nextX < 0) nextX = MAP_WIDTH - 1;

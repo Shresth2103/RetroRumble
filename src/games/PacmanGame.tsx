@@ -38,7 +38,7 @@ function ensureTailwindLoaded() {
   }
 }
 
-export default function PacmanGame({ onExit: _onExit, onMissionComplete, onNextGame, hasNextGame, nextGameLabel }: PacmanGameProps) {
+export default function PacmanGame({ onMissionComplete, onNextGame, hasNextGame, nextGameLabel }: PacmanGameProps) {
   const [status, setStatus] = useState<GameStatus>('START');
   const [teamName, setTeamName] = useState('PLAYER');
   const [finalScore, setFinalScore] = useState(0);
