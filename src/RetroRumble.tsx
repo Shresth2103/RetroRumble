@@ -329,21 +329,21 @@ function LockOverlay({ reward, rewardIcon }: { reward: string; rewardIcon: strin
   return (
     <div style={{
       position: "absolute", inset: 0,
-      background: "rgba(0,0,0,0.82)",
+      background: "rgba(2,6,12,0.92)",
       display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
-      backdropFilter: "blur(2px)",
       zIndex: 2,
     }}>
-      <div style={{ fontSize: 40, marginBottom: 8 }}>🔒</div>
-      <div style={{ color: "#aaa", fontFamily: "monospace", fontSize: 11, letterSpacing: 2, textAlign: "center", padding: "0 12px" }}>
+      <div style={{ fontSize: 32, marginBottom: 10 }}>🔒</div>
+      <div style={{ color: "#8cb6c8", fontFamily: "'Press Start 2P', monospace", fontSize: 10, lineHeight: 1.6, letterSpacing: 1, textAlign: "center", padding: "0 12px" }}>
         COMPLETE PREVIOUS MISSION
       </div>
       <div style={{
-        marginTop: 14, padding: "6px 14px",
-        border: "1px solid #444", borderRadius: 4,
-        color: "#666", fontFamily: "monospace", fontSize: 10,
+        marginTop: 14, padding: "8px 14px",
+        border: "2px solid #38576b",
+        color: "#7ef3ff", fontFamily: "monospace", fontSize: 10,
         letterSpacing: 1, textAlign: "center",
+        background: "#08131f",
       }}>
         REWARD: {rewardIcon} {reward.toUpperCase()}
       </div>
@@ -364,15 +364,17 @@ function GameCard({ game, onSelect, isActive }: { game: Game; onSelect: (g: Game
       style={{
         position: "relative",
         border: `2px solid ${game.locked ? "#333" : hovered ? game.color : game.borderColor}`,
-        borderRadius: 6,
-        background: "#050d1a",
+        borderRadius: 0,
+        background: game.locked
+          ? "#0c1117"
+          : "#08131f",
         overflow: "hidden",
         cursor: game.locked ? "not-allowed" : "pointer",
         boxShadow: game.locked ? "none" : hovered
-          ? `0 0 28px ${game.glowColor}88, 0 0 6px ${game.glowColor}44`
-          : `0 0 14px ${game.glowColor}44`,
-        transform: hovered && !game.locked ? "scale(1.01)" : "scale(1)",
-        transition: "all 0.2s ease",
+          ? `6px 6px 0 #02060d, 0 0 0 2px ${game.color}22 inset`
+          : "6px 6px 0 #02060d",
+        transform: hovered && !game.locked ? "translate(-2px, -2px)" : "translate(0, 0)",
+        transition: "transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease",
         filter: game.locked ? "brightness(0.55)" : "brightness(1)",
         animation: !game.locked && isActive ? "borderPulse 1.5s ease-in-out infinite" : "none",
       }}
@@ -380,8 +382,10 @@ function GameCard({ game, onSelect, isActive }: { game: Game; onSelect: (g: Game
       {/* Title bar */}
       <div style={{
         padding: "10px 16px",
-        background: game.locked ? "#111" : `${game.color}18`,
-        borderBottom: `1px solid ${game.locked ? "#222" : game.color}44`,
+        background: game.locked
+          ? "#111"
+          : `${game.color}22`,
+        borderBottom: `2px solid ${game.locked ? "#222" : game.color}55`,
         display: "flex", justifyContent: "space-between", alignItems: "center",
       }}>
         <span style={{
@@ -399,16 +403,27 @@ function GameCard({ game, onSelect, isActive }: { game: Game; onSelect: (g: Game
       </div>
 
       {/* Preview */}
-      <div style={{ position: "relative", height: 120 }}>
+      <div style={{ position: "relative", height: 120, background: "#020810" }}>
         {PREVIEWS[game.id]}
+        {!game.locked && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(0deg, rgba(0,0,0,0.18), rgba(0,0,0,0.18)), repeating-linear-gradient(0deg, transparent, transparent 8px, rgba(255,255,255,0.04) 8px, rgba(255,255,255,0.04) 10px), repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(255,255,255,0.03) 8px, rgba(255,255,255,0.03) 10px)",
+              pointerEvents: "none",
+            }}
+          />
+        )}
         {game.locked && <LockOverlay reward={game.reward} rewardIcon={game.rewardIcon} />}
       </div>
 
       {/* Footer */}
       <div style={{
         padding: "8px 16px",
-        background: "#020810",
-        borderTop: `1px solid ${game.locked ? "#1a1a1a" : game.color}22`,
+        background: "#050d1a",
+        borderTop: `2px solid ${game.locked ? "#1a1a1a" : game.color}22`,
         display: "flex", justifyContent: "space-between", alignItems: "center",
       }}>
         <span style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: 1, color: game.locked ? "#333" : "#777" }}>
@@ -642,29 +657,49 @@ function CircuitProgress({ completedCount, totalCount }: { completedCount: numbe
   const value = Math.round((completedCount / totalCount) * 100);
 
   return (
-    <div style={{ textAlign: "center", marginBottom: 32 }}>
-      <div style={{ fontFamily: "monospace", fontSize: 10, letterSpacing: 4, color: "#00FF41", marginBottom: 10 }}>
+    <div
+      style={{
+        textAlign: "center",
+        marginBottom: 32,
+        background: "#08131f",
+        border: "2px solid #12425a",
+        borderRadius: 0,
+        boxShadow: "8px 8px 0 #02060d",
+        padding: "24px 20px 18px",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "repeating-linear-gradient(0deg, transparent, transparent 11px, rgba(255,255,255,0.03) 11px, rgba(255,255,255,0.03) 12px), repeating-linear-gradient(90deg, transparent, transparent 11px, rgba(255,255,255,0.03) 11px, rgba(255,255,255,0.03) 12px)",
+          pointerEvents: "none",
+        }}
+      />
+      <div style={{ fontFamily: "monospace", fontSize: 10, letterSpacing: 4, color: "#00FF41", marginBottom: 10, position: "relative" }}>
         CIRCUIT PROGRESS
       </div>
       <div style={{
         position: "relative",
         height: 24, width: "100%", maxWidth: 420, margin: "0 auto",
         background: "#0a1a0a",
-        border: "1px solid #00FF4144",
-        borderRadius: 2,
+        border: "2px solid #00FF4144",
+        borderRadius: 0,
         overflow: "hidden",
       }}>
         <div style={{
           width: `${value}%`,
           height: "100%",
-          background: "linear-gradient(90deg, #00aa22, #00FF41)",
-          boxShadow: "0 0 12px #00FF4188",
+          background: "repeating-linear-gradient(90deg, #00aa22 0 14px, #00FF41 14px 28px)",
           transition: "width 0.6s ease",
           position: "relative",
         }}>
           <div style={{
             position: "absolute", inset: 0,
-            backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px)",
+          backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px)",
           }}/>
         </div>
         <span style={{
@@ -674,7 +709,7 @@ function CircuitProgress({ completedCount, totalCount }: { completedCount: numbe
           letterSpacing: 2, mixBlendMode: "difference",
         }}>{value}%</span>
       </div>
-      <div style={{ fontFamily: "monospace", fontSize: 9, color: "#446", marginTop: 8, letterSpacing: 2 }}>
+      <div style={{ fontFamily: "monospace", fontSize: 9, color: "#446", marginTop: 8, letterSpacing: 2, position: "relative" }}>
         {completedCount} / {totalCount} MISSIONS COMPLETE
       </div>
     </div>
@@ -687,7 +722,7 @@ function Scanlines() {
   return (
     <div style={{
       position: "fixed", inset: 0, pointerEvents: "none", zIndex: 50,
-      backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px)",
+      backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 6px)",
     }} />
   );
 }
@@ -708,13 +743,150 @@ function Stars() {
         <div key={i} style={{
           position: "absolute",
           left: `${s.x}%`, top: `${s.y}%`,
-          width: s.size, height: s.size,
+          width: s.size * 2, height: s.size * 2,
           background: "#fff",
-          borderRadius: "50%",
           opacity: s.op,
         }} />
       ))}
     </div>
+  );
+}
+
+function CircuitDecor() {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        pointerEvents: "none",
+        zIndex: 1,
+        opacity: 0.42,
+        overflow: "hidden",
+      }}
+    >
+      <svg
+        viewBox="0 0 1600 1000"
+        preserveAspectRatio="none"
+        width="100%"
+        height="100%"
+        style={{ display: "block" }}
+      >
+        <defs>
+          <linearGradient id="rr-wire-a" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#00CFFF" stopOpacity="0.1" />
+            <stop offset="50%" stopColor="#7ef3ff" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#00FF41" stopOpacity="0.1" />
+          </linearGradient>
+          <linearGradient id="rr-wire-b" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#00FF41" stopOpacity="0.08" />
+            <stop offset="100%" stopColor="#00CFFF" stopOpacity="0.35" />
+          </linearGradient>
+        </defs>
+
+        <path
+          d="M-20 140 C 220 140, 260 280, 470 280 L 720 280 C 820 280, 860 210, 940 210 L 1260 210"
+          stroke="url(#rr-wire-a)"
+          strokeWidth="12"
+          fill="none"
+          strokeLinecap="square"
+        />
+        <path
+          d="M1210 -20 L1210 180 C1210 260, 1110 260, 1110 340 L1110 540 C1110 650, 1290 650, 1290 790 L1290 1020"
+          stroke="url(#rr-wire-b)"
+          strokeWidth="10"
+          fill="none"
+          strokeLinecap="square"
+        />
+        <path
+          d="M180 1020 L180 760 C180 650, 340 650, 340 560 L340 470 C340 370, 520 370, 520 310"
+          stroke="url(#rr-wire-b)"
+          strokeWidth="7"
+          fill="none"
+          strokeLinecap="square"
+        />
+        <path
+          d="M680 1020 L680 820 C680 760, 760 760, 760 700 L760 620 C760 560, 880 560, 880 490"
+          stroke="url(#rr-wire-a)"
+          strokeWidth="7"
+          fill="none"
+          strokeLinecap="square"
+        />
+
+        {[
+          { x: 500, y: 250, rot: 0 },
+          { x: 1100, y: 570, rot: -90 },
+          { x: 270, y: 620, rot: 90 },
+          { x: 860, y: 470, rot: 0 },
+        ].map((resistor, index) => (
+          <g
+            key={index}
+            transform={`translate(${resistor.x} ${resistor.y}) rotate(${resistor.rot})`}
+            opacity="0.65"
+          >
+            <line x1="-56" y1="0" x2="-24" y2="0" stroke="#7ef3ff" strokeWidth="4" strokeLinecap="round" />
+            <line x1="24" y1="0" x2="56" y2="0" stroke="#7ef3ff" strokeWidth="4" strokeLinecap="round" />
+            <rect
+              x="-24"
+              y="-12"
+              width="48"
+              height="24"
+              shapeRendering="crispEdges"
+              fill="#d7c089"
+              fillOpacity="0.28"
+              stroke="#ffd700"
+              strokeOpacity="0.65"
+              strokeWidth="2"
+            />
+            <line x1="-12" y1="-12" x2="-12" y2="12" stroke="#ff7a00" strokeWidth="4" />
+            <line x1="0" y1="-12" x2="0" y2="12" stroke="#8b5cf6" strokeWidth="4" />
+            <line x1="12" y1="-12" x2="12" y2="12" stroke="#00FF41" strokeWidth="4" />
+          </g>
+        ))}
+
+        {[
+          { cx: 470, cy: 280, color: "#00FF41" },
+          { cx: 940, cy: 210, color: "#00CFFF" },
+          { cx: 1110, cy: 340, color: "#7ef3ff" },
+          { cx: 340, cy: 560, color: "#00FF41" },
+          { cx: 760, cy: 700, color: "#00CFFF" },
+        ].map((node, index) => (
+          <g key={index}>
+            <circle cx={node.cx} cy={node.cy} r="8" fill={node.color} fillOpacity="0.3" />
+            <circle cx={node.cx} cy={node.cy} r="3" fill={node.color} fillOpacity="0.8" />
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+function CabinetFrame() {
+  return (
+    <>
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 14,
+          background: "repeating-linear-gradient(90deg, #003346 0 24px, #00CFFF 24px 48px, #7ef3ff 48px 72px, #00CFFF 72px 96px)",
+          boxShadow: "0 4px 0 #02060d",
+          zIndex: 60,
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "fixed",
+          inset: "14px 12px 12px",
+          border: "2px solid rgba(0,207,255,0.22)",
+          boxShadow: "inset 0 0 0 1px rgba(126,243,255,0.06)",
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
+      />
+    </>
   );
 }
 
@@ -747,68 +919,94 @@ export default function RetroRumble() {
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body { background: #020810; min-height: 100vh; }
+        body {
+          background: #020810;
+          color: #dffaff;
+          image-rendering: pixelated;
+        }
         @keyframes borderPulse {
-          0%, 100% { box-shadow: 0 0 14px #00CFFF44; }
-          50% { box-shadow: 0 0 28px #00CFFF88, 0 0 6px #00CFFF44; }
+          0%, 100% { box-shadow: 6px 6px 0 #02060d; }
+          50% { box-shadow: 6px 6px 0 #02060d, 0 0 0 2px #00CFFF66 inset; }
         }
         @keyframes blink {
           0%, 100% { opacity: 1; } 50% { opacity: 0; }
         }
         ::-webkit-scrollbar { width: 6px; background: #020810; }
-        ::-webkit-scrollbar-thumb { background: #0a2a0a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #0a2a0a; }
       `}</style>
 
+      <CabinetFrame />
       <Scanlines />
       <Stars />
+      <CircuitDecor />
 
-      <div style={{ position: "relative", zIndex: 1, minHeight: "100vh", padding: "0 0 40px" }}>
+      <div style={{ position: "relative", zIndex: 2, minHeight: "100vh", padding: "24px 0 40px" }}>
 
         {/* Header */}
         <div style={{
-          background: "#00CFFF",
-          padding: "0 24px",
-          borderBottom: "3px solid #00CFFF",
-          boxShadow: "0 0 40px #00CFFF66, 0 4px 30px #00CFFF44",
+          padding: "8px 24px 0",
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          height: 64,
+          minHeight: 72,
+          position: "relative",
         }}>
-          <div style={{ display: "flex", gap: 8 }}>
-            {(["#00FF41","#FFD700","#FF4444"] as string[]).map((c,i) => (
-              <div key={i} style={{ width: 18, height: 18, background: c, border: "2px solid rgba(0,0,0,0.3)" }} />
-            ))}
-          </div>
-          <h1 style={{
-            fontFamily: "'Press Start 2P', monospace",
-            fontSize: "clamp(10px, 2.2vw, 18px)",
-            color: "#000",
-            letterSpacing: 3,
-            textAlign: "center",
-            flex: 1,
-          }}>
-            ACM SIGBED — RETRO RUMBLE.EXE
-          </h1>
           <div style={{ width: 70 }} />
+          <div style={{ flex: 1, padding: "0 18px", position: "relative" }}>
+            <h1 style={{
+              fontFamily: "'Press Start 2P', monospace",
+              fontSize: "clamp(12px, 2.2vw, 20px)",
+              color: "#dffaff",
+              letterSpacing: 3,
+              textAlign: "center",
+              textShadow: "2px 2px 0 #003346",
+            }}>
+              RETRO RUMBLE.EXE
+            </h1>
+            <div style={{ color: "#00CFFF", fontFamily: "monospace", fontSize: 10, letterSpacing: 2, paddingTop: 10, textAlign: "center" }}>
+              HIGH SCORE ARCADE // BUILD THE CIRCUIT
+            </div>
+          </div>
+          <div
+            style={{
+              width: 70,
+              textAlign: "right",
+              fontFamily: "monospace",
+              color: "#7ef3ff",
+              fontSize: 10,
+              letterSpacing: 2,
+              lineHeight: 1.6,
+              position: "relative",
+            }}
+          >
+            <div />
+          </div>
         </div>
 
         {/* Body */}
-        <div style={{ maxWidth: 960, margin: "0 auto", padding: "36px 20px 0" }}>
+        <div
+          style={{
+            maxWidth: 1080,
+            margin: "0 auto",
+            padding: "36px 20px 0",
+          }}
+        >
 
           <CircuitProgress completedCount={completedCount} totalCount={games.length} />
 
           {/* Active mission banner */}
           <div style={{
-            border: `1px solid ${(activeMission?.color ?? "#00FF41")}44`,
-            background: `${activeMission?.color ?? "#00FF41"}08`,
-            borderRadius: 4,
-            padding: "12px 20px",
+            border: `2px solid ${(activeMission?.color ?? "#00FF41")}55`,
+            background: "#08131f",
+            borderRadius: 0,
+            padding: "16px 20px",
             marginBottom: 28,
             display: "flex", alignItems: "center", gap: 12,
             fontFamily: "monospace",
+            boxShadow: "8px 8px 0 #02060d",
           }}>
-            <span style={{ color: activeMission?.color ?? "#00FF41", fontSize: 11, animation: "blink 1.2s step-end infinite" }}>▶</span>
+            <span style={{ color: activeMission?.color ?? "#00FF41", fontSize: 13, animation: "blink 1.2s step-end infinite" }}>▶</span>
             <div>
               <span style={{ color: activeMission?.color ?? "#00FF41", fontSize: 10, letterSpacing: 2 }}>ACTIVE MISSION: </span>
-              <span style={{ color: "#fff", fontSize: 10, letterSpacing: 1 }}>
+              <span style={{ color: "#fff", fontSize: 11, letterSpacing: 1 }}>
                 {activeMission
                   ? `${activeMission.title} — ${activeMission.completionCriteria}: ${activeMission.goal}`
                   : "ALL MISSIONS COMPLETE — Circuit build is fully unlocked"}
