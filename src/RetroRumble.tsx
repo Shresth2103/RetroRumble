@@ -226,7 +226,7 @@ function readMissionProgress(): MissionProgress {
   }
 
   try {
-    const raw = window.localStorage.getItem(MISSION_PROGRESS_STORAGE_KEY);
+    const raw = window.sessionStorage.getItem(MISSION_PROGRESS_STORAGE_KEY);
     return raw ? (JSON.parse(raw) as MissionProgress) : {};
   } catch {
     return {};
@@ -238,7 +238,7 @@ function writeMissionProgress(progress: MissionProgress) {
     return;
   }
 
-  window.localStorage.setItem(MISSION_PROGRESS_STORAGE_KEY, JSON.stringify(progress));
+  window.sessionStorage.setItem(MISSION_PROGRESS_STORAGE_KEY, JSON.stringify(progress));
 }
 
 function buildGames(progress: MissionProgress) {
