@@ -88,7 +88,7 @@ type UiState = {
 
 const PIECE_TYPES = Object.keys(SHAPES);
 const LINE_SCORES = [0, 100, 300, 500, 800];
-const RGB_UNLOCK_SCORE = 2000;
+const RGB_UNLOCK_SCORE = 800;
 
 // ─── PURE HELPERS ─────────────────────────────────────────────────────────────
 function cloneShape(shape: Matrix): Matrix {
