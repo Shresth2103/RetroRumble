@@ -91,6 +91,10 @@ type UiState = {
 const PIECE_TYPES = Object.keys(SHAPES);
 const LINE_SCORES = [0, 100, 300, 500, 800];
 const RGB_UNLOCK_SCORE = 300;
+const PANEL_W = 160;
+const LAYOUT_GAP = 16;
+const TETRIS_LAYOUT_W = PANEL_W * 2 + CANVAS_W + LAYOUT_GAP * 2;
+const TETRIS_LAYOUT_H = CANVAS_H + 110;
 
 // ─── PURE HELPERS ─────────────────────────────────────────────────────────────
 function cloneShape(shape: Matrix): Matrix {
@@ -394,6 +398,26 @@ export default function TetrisGame({ onMissionComplete, onNextGame, hasNextGame,
     buttonLabel: 'START GAME',
     rgbVisible: false,
   });
+  const [layoutScale, setLayoutScale] = useState(1);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const updateLayoutScale = () => {
+      const availableWidth = window.innerWidth - 40;
+      const availableHeight = window.innerHeight - 150;
+      const nextScale = Math.min(
+        1,
+        availableWidth / TETRIS_LAYOUT_W,
+        availableHeight / TETRIS_LAYOUT_H,
+      );
+      setLayoutScale(Math.max(0.68, nextScale));
+    };
+
+    updateLayoutScale();
+    window.addEventListener('resize', updateLayoutScale);
+    return () => window.removeEventListener('resize', updateLayoutScale);
+  }, []);
 
   const syncUi = useCallback(() => {
     const g = gs.current;
@@ -777,99 +801,114 @@ export default function TetrisGame({ onMissionComplete, onNextGame, hasNextGame,
     <>
       <style>{GLOBAL_STYLE}</style>
       <div style={{
-        minHeight: '100vh', display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', background: '#0a0a0f',
+        height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'flex-start', background: '#0a0a0f',
+        overflow: 'auto', padding: '18px 12px 28px',
       }}>
-        {/* Title */}
         <div style={{
-          fontFamily: "'Press Start 2P', monospace",
-          fontSize: 'clamp(18px, 3vw, 32px)',
-          color: '#00ffcc',
-          textShadow: '0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 40px #00ffcc',
-          letterSpacing: 12, marginBottom: 20,
-          animation: 'flicker 6s infinite',
-        }}>TETRIS</div>
-
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-
-          {/* LEFT PANEL */}
-          <Panel>
-            <PanelSection title="SCORE"><PanelValue>{String(ui.score).padStart(6,'0')}</PanelValue></PanelSection>
-            <PanelSection title="LEVEL">
-              <PanelValue>{String(ui.level).padStart(2,'0')}</PanelValue>
-              <div style={{ marginTop: 8, height: 6, background: '#005544', width: '100%' }}>
-                <div style={{ height: '100%', background: '#00ffcc', boxShadow: '0 0 6px #00ffcc', width: `${ui.linesInLevel * 10}%`, transition: 'width 0.3s' }} />
-              </div>
-              <div style={{ fontSize: 6, color: '#007755', marginTop: 4 }}>{ui.linesInLevel}/10</div>
-            </PanelSection>
-            <PanelSection title="LINES"><PanelValue>{String(ui.lines).padStart(3,'0')}</PanelValue></PanelSection>
-            <PanelSection title="HIGH SCORE"><PanelValue>{String(ui.hiScore).padStart(6,'0')}</PanelValue></PanelSection>
-          </Panel>
-
-          {/* GAME CANVAS */}
+          width: TETRIS_LAYOUT_W * layoutScale,
+          minHeight: TETRIS_LAYOUT_H * layoutScale,
+          display: 'flex',
+          justifyContent: 'center',
+        }}>
           <div style={{
-            position: 'relative',
-            border: '2px solid #00ffcc',
-            boxShadow: '0 0 20px rgba(0,255,204,0.4), 0 0 40px rgba(0,255,204,0.15), inset 0 0 30px rgba(0,255,204,0.05)',
+            width: TETRIS_LAYOUT_W,
+            transform: `scale(${layoutScale})`,
+            transformOrigin: 'top center',
           }}>
-            <canvas ref={canvasRef} width={CANVAS_W} height={CANVAS_H}
-              style={{ display: 'block', background: '#050508', imageRendering: 'pixelated' }} />
+            {/* Title */}
+            <div style={{
+              fontFamily: "'Press Start 2P', monospace",
+              fontSize: 'clamp(18px, 3vw, 32px)',
+              color: '#00ffcc',
+              textShadow: '0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 40px #00ffcc',
+              letterSpacing: 12, marginBottom: 20,
+              animation: 'flicker 6s infinite',
+              textAlign: 'center',
+            }}>TETRIS</div>
 
-            {/* Overlay */}
-            {showOverlay && (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: LAYOUT_GAP }}>
+
+              {/* LEFT PANEL */}
+              <Panel>
+                <PanelSection title="SCORE"><PanelValue>{String(ui.score).padStart(6,'0')}</PanelValue></PanelSection>
+                <PanelSection title="LEVEL">
+                  <PanelValue>{String(ui.level).padStart(2,'0')}</PanelValue>
+                  <div style={{ marginTop: 8, height: 6, background: '#005544', width: '100%' }}>
+                    <div style={{ height: '100%', background: '#00ffcc', boxShadow: '0 0 6px #00ffcc', width: `${ui.linesInLevel * 10}%`, transition: 'width 0.3s' }} />
+                  </div>
+                  <div style={{ fontSize: 6, color: '#007755', marginTop: 4 }}>{ui.linesInLevel}/10</div>
+                </PanelSection>
+                <PanelSection title="LINES"><PanelValue>{String(ui.lines).padStart(3,'0')}</PanelValue></PanelSection>
+                <PanelSection title="HIGH SCORE"><PanelValue>{String(ui.hiScore).padStart(6,'0')}</PanelValue></PanelSection>
+              </Panel>
+
+              {/* GAME CANVAS */}
               <div style={{
-                position: 'absolute', inset: 0, background: 'rgba(5,5,8,0.88)',
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                justifyContent: 'center', gap: 20, zIndex: 10,
+                position: 'relative',
+                border: '2px solid #00ffcc',
+                boxShadow: '0 0 20px rgba(0,255,204,0.4), 0 0 40px rgba(0,255,204,0.15), inset 0 0 30px rgba(0,255,204,0.05)',
               }}>
-                <div style={{
-                  fontSize: 14, color: '#ff003c',
-                  textShadow: '0 0 10px #ff003c, 0 0 30px #ff003c',
-                  fontFamily: "'Press Start 2P', monospace",
-                  animation: 'pulse 1s ease-in-out infinite alternate',
-                }}>
-                  {isPaused ? 'PAUSED' : ui.overlayTitle}
-                </div>
-                <div style={{ fontSize: 7, color: '#007755', letterSpacing: 1, textAlign: 'center', lineHeight: 2, fontFamily: "'Press Start 2P', monospace", whiteSpace: 'pre-line' }}>
-                  {isPaused ? 'PRESS P TO RESUME' : ui.overlaySub}
-                </div>
-                {!isPaused && (
-                  <button onClick={startGame} style={{
-                    fontFamily: "'Press Start 2P', monospace", fontSize: 8,
-                    padding: '10px 20px', background: 'transparent',
-                    border: '2px solid #00ffcc', color: '#00ffcc', cursor: 'pointer',
-                    letterSpacing: 2, textShadow: '0 0 6px #00ffcc',
-                    boxShadow: '0 0 10px rgba(0,255,204,0.15)', transition: 'all 0.1s',
-                  }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,255,204,0.15)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(0,255,204,0.4)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.boxShadow = '0 0 10px rgba(0,255,204,0.15)'; }}
-                  >
-                    {ui.gameState === 'idle' ? 'START GAME' : 'PLAY AGAIN'}
-                  </button>
+                <canvas ref={canvasRef} width={CANVAS_W} height={CANVAS_H}
+                  style={{ display: 'block', background: '#050508', imageRendering: 'pixelated' }} />
+
+                {/* Overlay */}
+                {showOverlay && (
+                  <div style={{
+                    position: 'absolute', inset: 0, background: 'rgba(5,5,8,0.88)',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center',
+                    justifyContent: 'center', gap: 20, zIndex: 10,
+                  }}>
+                    <div style={{
+                      fontSize: 14, color: '#ff003c',
+                      textShadow: '0 0 10px #ff003c, 0 0 30px #ff003c',
+                      fontFamily: "'Press Start 2P', monospace",
+                      animation: 'pulse 1s ease-in-out infinite alternate',
+                    }}>
+                      {isPaused ? 'PAUSED' : ui.overlayTitle}
+                    </div>
+                    <div style={{ fontSize: 7, color: '#007755', letterSpacing: 1, textAlign: 'center', lineHeight: 2, fontFamily: "'Press Start 2P', monospace", whiteSpace: 'pre-line' }}>
+                      {isPaused ? 'PRESS P TO RESUME' : ui.overlaySub}
+                    </div>
+                    {!isPaused && (
+                      <button onClick={startGame} style={{
+                        fontFamily: "'Press Start 2P', monospace", fontSize: 8,
+                        padding: '10px 20px', background: 'transparent',
+                        border: '2px solid #00ffcc', color: '#00ffcc', cursor: 'pointer',
+                        letterSpacing: 2, textShadow: '0 0 6px #00ffcc',
+                        boxShadow: '0 0 10px rgba(0,255,204,0.15)', transition: 'all 0.1s',
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,255,204,0.15)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(0,255,204,0.4)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.boxShadow = '0 0 10px rgba(0,255,204,0.15)'; }}
+                      >
+                        {ui.gameState === 'idle' ? 'START GAME' : 'PLAY AGAIN'}
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
 
-          {/* RIGHT PANEL */}
-          <Panel>
-            <PanelSection title="NEXT">
-              <canvas ref={nextRef} width={120} height={100}
-                style={{ display: 'block', margin: '6px auto 0', imageRendering: 'pixelated' }} />
-            </PanelSection>
-            <PanelSection title="HOLD">
-              <canvas ref={holdRef} width={120} height={100}
-                style={{ display: 'block', margin: '6px auto 0', imageRendering: 'pixelated' }} />
-            </PanelSection>
-            <div style={{ marginTop: 14, fontSize: 9, color: '#007755', lineHeight: 2.4, letterSpacing: 1 }}>
-              <span style={{ color: '#00ffcc', textShadow: '0 0 4px #00ffcc' }}>←→</span> MOVE<br />
-              <span style={{ color: '#00ffcc', textShadow: '0 0 4px #00ffcc' }}>↑</span> ROTATE<br />
-              <span style={{ color: '#00ffcc', textShadow: '0 0 4px #00ffcc' }}>↓</span> SOFT DROP<br />
-              <span style={{ color: '#00ffcc', textShadow: '0 0 4px #00ffcc' }}>SPACE</span> HARD DROP<br />
-              <span style={{ color: '#00ffcc', textShadow: '0 0 4px #00ffcc' }}>C</span> HOLD<br />
-              <span style={{ color: '#00ffcc', textShadow: '0 0 4px #00ffcc' }}>P</span> PAUSE
+              {/* RIGHT PANEL */}
+              <Panel>
+                <PanelSection title="NEXT">
+                  <canvas ref={nextRef} width={120} height={100}
+                    style={{ display: 'block', margin: '6px auto 0', imageRendering: 'pixelated' }} />
+                </PanelSection>
+                <PanelSection title="HOLD">
+                  <canvas ref={holdRef} width={120} height={100}
+                    style={{ display: 'block', margin: '6px auto 0', imageRendering: 'pixelated' }} />
+                </PanelSection>
+                <div style={{ marginTop: 14, fontSize: 9, color: '#007755', lineHeight: 2.4, letterSpacing: 1 }}>
+                  <span style={{ color: '#00ffcc', textShadow: '0 0 4px #00ffcc' }}>←→</span> MOVE<br />
+                  <span style={{ color: '#00ffcc', textShadow: '0 0 4px #00ffcc' }}>↑</span> ROTATE<br />
+                  <span style={{ color: '#00ffcc', textShadow: '0 0 4px #00ffcc' }}>↓</span> SOFT DROP<br />
+                  <span style={{ color: '#00ffcc', textShadow: '0 0 4px #00ffcc' }}>SPACE</span> HARD DROP<br />
+                  <span style={{ color: '#00ffcc', textShadow: '0 0 4px #00ffcc' }}>C</span> HOLD<br />
+                  <span style={{ color: '#00ffcc', textShadow: '0 0 4px #00ffcc' }}>P</span> PAUSE
+                </div>
+              </Panel>
             </div>
-          </Panel>
+          </div>
         </div>
       </div>
 
