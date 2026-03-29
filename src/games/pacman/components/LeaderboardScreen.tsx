@@ -1,7 +1,3 @@
-import { useState } from 'react';
-import type { HighScore } from '../types';
-import { getLeaderboard } from '../utils/storage';
-
 interface LeaderboardScreenProps {
   currentScore: number;
   teamName: string;
@@ -14,8 +10,6 @@ interface LeaderboardScreenProps {
 }
 
 const LeaderboardScreen = ({ currentScore, teamName, onRestart, onNextGame, isGameOver, isVictory, hasNextGame, nextGameLabel }: LeaderboardScreenProps) => {
-  const [scores] = useState<HighScore[]>(() => getLeaderboard());
-
   return (
     <div className="flex flex-col items-center justify-start w-full max-w-3xl mx-auto space-y-6 animate-fade-in px-4 py-6">
       {isVictory && (
@@ -35,27 +29,26 @@ const LeaderboardScreen = ({ currentScore, teamName, onRestart, onNextGame, isGa
         </div>
       )}
 
-      <div className="bg-gray-900 border-4 sm:border-8 border-blue-900 rounded-xl p-4 sm:p-8 w-full shadow-2xl">
-        <h3 className="text-xl sm:text-2xl md:text-3xl text-blue-300 text-center mb-6 pixel-font underline decoration-4 underline-offset-8 drop-shadow-md leading-relaxed">
-          TOP 5 TEAMS
+      <div className="bg-gray-900 border-4 sm:border-8 border-blue-900 rounded-xl px-6 py-5 sm:px-10 sm:py-8 w-full max-w-xl shadow-2xl text-center">
+        <h3 className="text-xl sm:text-2xl md:text-3xl text-blue-300 pixel-font underline decoration-4 underline-offset-8 drop-shadow-md leading-relaxed">
+          MISSION STATUS
         </h3>
-        <div className="space-y-4 sm:space-y-6 overflow-x-auto">
-          <div className="grid grid-cols-3 text-gray-400 text-[10px] sm:text-sm md:text-lg border-b-2 border-gray-700 pb-4 pixel-font tracking-wider min-w-[280px]">
-            <span className="text-left">RANK</span>
-            <span className="text-center">TEAM</span>
-            <span className="text-right">SCORE</span>
-          </div>
-          {scores.map((s, idx) => (
-            <div key={idx} className={`grid grid-cols-3 pixel-font text-sm sm:text-lg md:text-2xl py-2 min-w-[280px] ${s.teamName === teamName && s.score === currentScore && isGameOver ? 'text-yellow-300 animate-pulse font-bold' : 'text-white'}`}>
-              <span className="text-left">#{idx + 1}</span>
-              <span className="text-center">{s.teamName}</span>
-              <span className="text-right">{s.score}</span>
-            </div>
-          ))}
-          {scores.length === 0 && (
-            <div className="text-center text-gray-500 py-6 pixel-font text-lg">NO SCORES YET</div>
-          )}
-        </div>
+        <p className="text-sm sm:text-lg md:text-xl text-white pixel-font mt-6 leading-relaxed">
+          TEAM: <span className="text-yellow-400">{teamName}</span>
+        </p>
+        <p className="text-sm sm:text-lg md:text-xl text-white pixel-font mt-4 leading-relaxed">
+          FINAL SCORE: <span className="text-green-400">{currentScore}</span>
+        </p>
+        {isGameOver && (
+          <p className="text-xs sm:text-sm md:text-base text-red-300 pixel-font mt-5 leading-relaxed">
+            TRY AGAIN TO CLEAR ROUND 2
+          </p>
+        )}
+        {isVictory && (
+          <p className="text-xs sm:text-sm md:text-base text-green-300 pixel-font mt-5 leading-relaxed">
+            BREADBOARD UNLOCKED
+          </p>
+        )}
       </div>
 
       <div className="mt-4 flex flex-wrap items-center justify-center gap-4">

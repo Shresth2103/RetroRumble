@@ -14,12 +14,32 @@ type PacmanGameProps = {
   nextGameLabel: string | null;
 };
 
-function ensureTailwindLoaded() {
+function ensureTailwindLoaded(onReady: () => void) {
   if (typeof document === 'undefined') {
+    onReady();
     return;
   }
 
-  if (!document.getElementById('rr-tailwind-cdn')) {
+  const existingScript = document.getElementById('rr-tailwind-cdn') as HTMLScriptElement | null;
+  if (existingScript?.dataset.ready === 'true') {
+    onReady();
+    return;
+  }
+
+  const handleReady = () => {
+    const script = document.getElementById('rr-tailwind-cdn') as HTMLScriptElement | null;
+    if (script) {
+      script.dataset.ready = 'true';
+    }
+    onReady();
+  };
+
+  if (existingScript) {
+    existingScript.addEventListener('load', handleReady, { once: true });
+    return;
+  }
+
+  if (!document.getElementById('rr-tailwind-config')) {
     const configScript = document.createElement('script');
     configScript.id = 'rr-tailwind-config';
     configScript.text = `
@@ -29,22 +49,24 @@ function ensureTailwindLoaded() {
       };
     `;
     document.head.appendChild(configScript);
-
-    const tailwindScript = document.createElement('script');
-    tailwindScript.id = 'rr-tailwind-cdn';
-    tailwindScript.src = 'https://cdn.tailwindcss.com';
-    tailwindScript.async = true;
-    document.head.appendChild(tailwindScript);
   }
+
+  const tailwindScript = document.createElement('script');
+  tailwindScript.id = 'rr-tailwind-cdn';
+  tailwindScript.src = 'https://cdn.tailwindcss.com';
+  tailwindScript.async = true;
+  tailwindScript.addEventListener('load', handleReady, { once: true });
+  document.head.appendChild(tailwindScript);
 }
 
 export default function PacmanGame({ onMissionComplete, onNextGame, hasNextGame, nextGameLabel }: PacmanGameProps) {
   const [status, setStatus] = useState<GameStatus>('START');
   const [teamName, setTeamName] = useState('PLAYER');
   const [finalScore, setFinalScore] = useState(0);
+  const [tailwindReady, setTailwindReady] = useState(false);
 
   useEffect(() => {
-    ensureTailwindLoaded();
+    ensureTailwindLoaded(() => setTailwindReady(true));
   }, []);
 
   const handleStartGame = (name: string) => {
@@ -75,9 +97,15 @@ export default function PacmanGame({ onMissionComplete, onNextGame, hasNextGame,
   return (
     <div className="rr-pacman-root">
       <div className="rr-pacman-shell">
-        {status === 'START' && <StartScreen onStart={handleStartGame} />}
+        {!tailwindReady && (
+          <div className="rr-pacman-loading pixel-font">
+            LOADING PAC-MAN UI...
+          </div>
+        )}
 
-        {status === 'PLAYING' && (
+        {tailwindReady && status === 'START' && <StartScreen onStart={handleStartGame} />}
+
+        {tailwindReady && status === 'PLAYING' && (
           <GameScreen
             teamName={teamName}
             onGameOver={handleGameOver}
@@ -85,11 +113,11 @@ export default function PacmanGame({ onMissionComplete, onNextGame, hasNextGame,
           />
         )}
 
-        {status === 'BREADBOARD' && (
+        {tailwindReady && status === 'BREADBOARD' && (
           <BreadboardScreen onContinue={handleBreadboardContinue} />
         )}
 
-        {(status === 'VICTORY' || status === 'LEADERBOARD') && (
+        {tailwindReady && (status === 'VICTORY' || status === 'LEADERBOARD') && (
           <LeaderboardScreen
             currentScore={finalScore}
             teamName={teamName}

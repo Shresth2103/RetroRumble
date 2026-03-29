@@ -35,3 +35,18 @@
   justify-content: center;
   padding: 24px 16px 32px;
 }
+
+.rr-pacman-loading {
+  width: 100%;
+  max-width: 44rem;
+  margin: 4rem auto 0;
+  padding: 2rem 1.5rem;
+  border: 4px solid #1d4ed8;
+  border-radius: 0.75rem;
+  background: rgba(17, 24, 39, 0.92);
+  color: #facc15;
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.8;
+  box-shadow: 0 0 24px rgba(29, 78, 216, 0.35);
+}
