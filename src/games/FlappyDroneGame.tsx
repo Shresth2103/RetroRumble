@@ -14,6 +14,9 @@ const GROUND = H - 52;
 const GAP = 130;
 const BUILDING_SPEED = 2.5;
 const FLAP_LIFT = 8;
+const FRAME_MS = 1000 / 60;
+const MAX_FRAME_DELTA_MS = 48;
+const THRUST_SPAWN_MS = 32;
 
 type Particle = {
   x: number;
@@ -82,6 +85,7 @@ type InternalState = {
   best: number;
   frame: number;
   propSpin: number;
+  thrustTimer: number;
   drone: Drone;
   particles: Particle[];
   buildings: Building[];
@@ -179,6 +183,7 @@ export default function FlappyDroneGame({ onExit, onMissionComplete, onNextGame,
     best: 0,
     frame: 0,
     propSpin: 0,
+    thrustTimer: 0,
     drone: { x: 110, y: H / 2, vy: 0, tilt: 0 },
     particles: [],
     buildings: [],
@@ -200,6 +205,7 @@ export default function FlappyDroneGame({ onExit, onMissionComplete, onNextGame,
     state.score = 0;
     state.buildings = [makeBuilding()];
     state.frame = 0;
+    state.thrustTimer = 0;
     state.particles = [];
     state.cars = makeCars();
     state.groundOffset = 0;
@@ -405,7 +411,7 @@ export default function FlappyDroneGame({ onExit, onMissionComplete, onNextGame,
       ctx.restore();
     }
 
-    function drawGround() {
+    function drawGround(frameScale: number) {
       const state = stateRef.current;
 
       ctx.fillStyle = "#1a0030";
@@ -431,7 +437,7 @@ export default function FlappyDroneGame({ onExit, onMissionComplete, onNextGame,
         drawPixelCar(car.x, y, car.color, car.roof, car.type);
 
         if (state.gameState === "playing") {
-          car.x -= car.speed;
+          car.x -= car.speed * frameScale;
           if (car.x + 40 < 0) {
             car.x = W + 10;
           }
@@ -439,7 +445,7 @@ export default function FlappyDroneGame({ onExit, onMissionComplete, onNextGame,
       });
 
       if (state.gameState === "playing") {
-        state.groundOffset = (state.groundOffset + BUILDING_SPEED) % W;
+        state.groundOffset = (state.groundOffset + BUILDING_SPEED * frameScale) % W;
       }
     }
 
@@ -706,32 +712,46 @@ export default function FlappyDroneGame({ onExit, onMissionComplete, onNextGame,
       }));
     }
 
-    function loop() {
+    let lastFrameTime = 0;
+
+    function loop(now: number) {
       const state = stateRef.current;
-      state.propSpin += state.gameState === "playing" ? 0.35 : 0.12;
-      state.frame += 1;
+      if (lastFrameTime === 0) {
+        lastFrameTime = now;
+      }
+
+      const deltaMs = Math.min(now - lastFrameTime, MAX_FRAME_DELTA_MS);
+      lastFrameTime = now;
+      const frameScale = deltaMs / FRAME_MS;
+
+      state.propSpin += (state.gameState === "playing" ? 0.35 : 0.12) * frameScale;
+      state.frame += frameScale;
 
       if (state.gameState === "playing") {
-        state.drone.vy += 0.5;
-        state.drone.vy *= 0.97;
-        state.drone.y += state.drone.vy;
+        state.drone.vy += 0.5 * frameScale;
+        state.drone.vy *= Math.pow(0.97, frameScale);
+        state.drone.y += state.drone.vy * frameScale;
         state.drone.tilt = Math.max(-0.35, Math.min(0.45, state.drone.vy * 0.048));
-        spawnThrust(state.drone.x, state.drone.y);
+        state.thrustTimer += deltaMs;
+        while (state.thrustTimer >= THRUST_SPAWN_MS) {
+          spawnThrust(state.drone.x, state.drone.y);
+          state.thrustTimer -= THRUST_SPAWN_MS;
+        }
 
         state.particles.forEach((particle) => {
-          particle.x += particle.vx;
-          particle.y += particle.vy;
-          particle.life -= particle.decay;
+          particle.x += particle.vx * frameScale;
+          particle.y += particle.vy * frameScale;
+          particle.life -= particle.decay * frameScale;
           if (particle.type === "death") {
-            particle.vy += 0.15;
+            particle.vy += 0.15 * frameScale;
           } else {
-            particle.r *= 0.94;
+            particle.r *= Math.pow(0.94, frameScale);
           }
         });
         state.particles = state.particles.filter((particle) => particle.life > 0);
 
         state.buildings.forEach((building) => {
-          building.x -= BUILDING_SPEED;
+          building.x -= BUILDING_SPEED * frameScale;
 
           if (!building.scored && building.x + building.w < state.drone.x) {
             building.scored = true;
@@ -787,13 +807,13 @@ export default function FlappyDroneGame({ onExit, onMissionComplete, onNextGame,
         }
       } else {
         state.particles.forEach((particle) => {
-          particle.x += particle.vx;
-          particle.y += particle.vy;
-          particle.life -= particle.decay;
+          particle.x += particle.vx * frameScale;
+          particle.y += particle.vy * frameScale;
+          particle.life -= particle.decay * frameScale;
           if (particle.type === "death") {
-            particle.vy += 0.15;
+            particle.vy += 0.15 * frameScale;
           } else {
-            particle.r *= 0.94;
+            particle.r *= Math.pow(0.94, frameScale);
           }
         });
         state.particles = state.particles.filter((particle) => particle.life > 0);
@@ -803,7 +823,7 @@ export default function FlappyDroneGame({ onExit, onMissionComplete, onNextGame,
       drawClouds();
       drawBackgroundBuildings();
       drawBuildings();
-      drawGround();
+      drawGround(frameScale);
       drawParticles();
       drawDrone(state.drone.x, state.drone.y, state.drone.tilt, state.propSpin);
       drawScanlines();
